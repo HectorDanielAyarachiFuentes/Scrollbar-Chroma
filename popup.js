@@ -17,6 +17,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const thumbColor1Input = document.getElementById('thumb-color-1');
     const thumbColor2Input = document.getElementById('thumb-color-2');
     const advancedColorsCard = document.getElementById('advanced-colors-card');
+    const advancedPresetsCard = document.getElementById('advanced-presets-card');
+    const presetThumb = document.getElementById('preset-thumb');
+    const presetTrack = document.getElementById('preset-track');
+
+    let gradientsData = [];
+
+    // Load gradients.json
+    fetch('gradients.json')
+        .then(res => res.json())
+        .then(data => {
+            gradientsData = data;
+            data.forEach((grad, index) => {
+                const opt1 = document.createElement('option');
+                opt1.value = index;
+                opt1.textContent = grad.name;
+                presetThumb.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = index;
+                opt2.textContent = grad.name;
+                presetTrack.appendChild(opt2);
+            });
+            // Try to set selections after loading
+            chrome.storage.local.get(['advancedThumbGradientIndex', 'advancedTrackGradientIndex'], (r) => {
+                if (r.advancedThumbGradientIndex !== undefined) presetThumb.value = r.advancedThumbGradientIndex;
+                if (r.advancedTrackGradientIndex !== undefined) presetTrack.value = r.advancedTrackGradientIndex;
+            });
+        });
 
     // Load saved settings
     chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2'], (result) => {
@@ -71,16 +99,70 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isAdvanced) {
             advancedColorsCard.style.opacity = '1';
             advancedColorsCard.style.pointerEvents = 'auto';
+            advancedPresetsCard.style.opacity = '1';
+            advancedPresetsCard.style.pointerEvents = 'auto';
         } else {
             advancedColorsCard.style.opacity = '0.5';
             advancedColorsCard.style.pointerEvents = 'none';
+            advancedPresetsCard.style.opacity = '0.5';
+            advancedPresetsCard.style.pointerEvents = 'none';
         }
     }
 
-    trackColorInput.addEventListener('input', (e) => chrome.storage.local.set({ trackColor: e.target.value }));
-    trackColor2Input.addEventListener('input', (e) => chrome.storage.local.set({ trackColor2: e.target.value }));
-    thumbColor1Input.addEventListener('input', (e) => chrome.storage.local.set({ thumbColor1: e.target.value }));
-    thumbColor2Input.addEventListener('input', (e) => chrome.storage.local.set({ thumbColor2: e.target.value }));
+    presetThumb.addEventListener('change', (e) => {
+        if (e.target.value === "") {
+            chrome.storage.local.remove(['advancedThumbGradientString', 'advancedThumbGradientIndex']);
+            return;
+        }
+        const grad = gradientsData[e.target.value];
+        const colorsStr = grad.colors.join(', ');
+        chrome.storage.local.set({ 
+            advancedThumbGradientString: colorsStr,
+            advancedThumbGradientIndex: e.target.value,
+            thumbColor1: grad.colors[0],
+            thumbColor2: grad.colors[grad.colors.length - 1]
+        });
+        thumbColor1Input.value = grad.colors[0];
+        thumbColor2Input.value = grad.colors[grad.colors.length - 1];
+    });
+
+    presetTrack.addEventListener('change', (e) => {
+        if (e.target.value === "") {
+            chrome.storage.local.remove(['advancedTrackGradientString', 'advancedTrackGradientIndex']);
+            return;
+        }
+        const grad = gradientsData[e.target.value];
+        const colorsStr = grad.colors.join(', ');
+        chrome.storage.local.set({ 
+            advancedTrackGradientString: colorsStr,
+            advancedTrackGradientIndex: e.target.value,
+            trackColor: grad.colors[0],
+            trackColor2: grad.colors[grad.colors.length - 1]
+        });
+        trackColorInput.value = grad.colors[0];
+        trackColor2Input.value = grad.colors[grad.colors.length - 1];
+    });
+
+    trackColorInput.addEventListener('input', (e) => {
+        chrome.storage.local.set({ trackColor: e.target.value });
+        chrome.storage.local.remove(['advancedTrackGradientString', 'advancedTrackGradientIndex']);
+        presetTrack.value = "";
+    });
+    trackColor2Input.addEventListener('input', (e) => {
+        chrome.storage.local.set({ trackColor2: e.target.value });
+        chrome.storage.local.remove(['advancedTrackGradientString', 'advancedTrackGradientIndex']);
+        presetTrack.value = "";
+    });
+    thumbColor1Input.addEventListener('input', (e) => {
+        chrome.storage.local.set({ thumbColor1: e.target.value });
+        chrome.storage.local.remove(['advancedThumbGradientString', 'advancedThumbGradientIndex']);
+        presetThumb.value = "";
+    });
+    thumbColor2Input.addEventListener('input', (e) => {
+        chrome.storage.local.set({ thumbColor2: e.target.value });
+        chrome.storage.local.remove(['advancedThumbGradientString', 'advancedThumbGradientIndex']);
+        presetThumb.value = "";
+    });
 
     // Toggle Extension
     toggleExtension.addEventListener('change', (e) => {

@@ -47,13 +47,16 @@ function updateScrollbar(settings) {
     
     document.documentElement.classList.add('scrollbar-premium-active');
 
-    let c1, c2, trackColor, trackColor2, customGradient = null;
+    let c1, c2, trackColor, trackColor2, customGradient = null, trackCustomGradient = null;
     
     if (settings.advancedColorsEnabled) {
         c1 = settings.thumbColor1 || '#a855f7';
         c2 = settings.thumbColor2 || '#3b82f6';
+        customGradient = settings.advancedThumbGradientString || null;
+        
         trackColor = settings.trackColor || '#141418';
         trackColor2 = settings.trackColor2 || trackColor;
+        trackCustomGradient = settings.advancedTrackGradientString || null;
     } else if (settings.syncBrowserTheme && settings.browserThemeColors) {
         c1 = settings.browserThemeColors.c1;
         c2 = settings.browserThemeColors.c2;
@@ -68,7 +71,7 @@ function updateScrollbar(settings) {
     }
     
     const thumbBgGradient = customGradient ? `linear-gradient(180deg, ${customGradient})` : `linear-gradient(180deg, ${c1}, ${c2})`;
-    const trackBgGradient = `linear-gradient(180deg, ${trackColor}, ${trackColor2})`;
+    const trackBgGradient = trackCustomGradient ? `linear-gradient(180deg, ${trackCustomGradient})` : `linear-gradient(180deg, ${trackColor}, ${trackColor2})`;
     
     // Construimos el SVG dependiendo de si el texto está activado
     const svgText = settings.showText !== false 
@@ -131,7 +134,7 @@ function updateScrollbar(settings) {
 }
 
 // Inicialización: cargar datos guardados
-chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2'], (result) => {
+chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'advancedThumbGradientString', 'advancedTrackGradientString'], (result) => {
     const settings = {
         extensionEnabled: result.extensionEnabled !== false, // Por defecto true
         showText: result.showText !== false, // Por defecto true
@@ -142,7 +145,9 @@ chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserT
         trackColor: result.trackColor || '#141418',
         trackColor2: result.trackColor2 || '#141418',
         thumbColor1: result.thumbColor1 || '#a855f7',
-        thumbColor2: result.thumbColor2 || '#3b82f6'
+        thumbColor2: result.thumbColor2 || '#3b82f6',
+        advancedThumbGradientString: result.advancedThumbGradientString || null,
+        advancedTrackGradientString: result.advancedTrackGradientString || null
     };
     updateScrollbar(settings);
 });
@@ -150,7 +155,7 @@ chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserT
 // Escuchar cambios desde el popup en tiempo real
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'local') {
-        chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2'], (result) => {
+        chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'advancedThumbGradientString', 'advancedTrackGradientString'], (result) => {
             const settings = {
                 extensionEnabled: result.extensionEnabled !== false,
                 showText: result.showText !== false,
@@ -161,7 +166,9 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
                 trackColor: result.trackColor || '#141418',
                 trackColor2: result.trackColor2 || '#141418',
                 thumbColor1: result.thumbColor1 || '#a855f7',
-                thumbColor2: result.thumbColor2 || '#3b82f6'
+                thumbColor2: result.thumbColor2 || '#3b82f6',
+                advancedThumbGradientString: result.advancedThumbGradientString || null,
+                advancedTrackGradientString: result.advancedTrackGradientString || null
             };
             updateScrollbar(settings);
         });
