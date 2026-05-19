@@ -16,7 +16,8 @@
 }
 
 body {
-    width: 320px;
+    width: 100%;
+    min-width: 320px;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-main);
     color: var(--text-primary);
@@ -194,7 +195,7 @@ input[type="color"]::-webkit-color-swatch {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--t-color-1), var(--t-color-2));
+    background: var(--t-bg, linear-gradient(135deg, var(--t-color-1), var(--t-color-2)));
 }
 
 .options {

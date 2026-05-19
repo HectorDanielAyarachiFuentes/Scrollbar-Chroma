@@ -13,12 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Advanced Colors
     const toggleAdvancedColors = document.getElementById('toggle-advanced-colors');
     const trackColorInput = document.getElementById('track-color');
+    const trackColor2Input = document.getElementById('track-color-2');
     const thumbColor1Input = document.getElementById('thumb-color-1');
     const thumbColor2Input = document.getElementById('thumb-color-2');
     const advancedColorsCard = document.getElementById('advanced-colors-card');
 
     // Load saved settings
-    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'thumbColor1', 'thumbColor2'], (result) => {
+    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2'], (result) => {
         if (result.extensionEnabled !== undefined) {
             toggleExtension.checked = result.extensionEnabled;
             updateStatus(result.extensionEnabled);
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateAdvancedUI(result.advancedColorsEnabled);
         }
         if (result.trackColor) trackColorInput.value = result.trackColor;
+        if (result.trackColor2) trackColor2Input.value = result.trackColor2;
         if (result.thumbColor1) thumbColor1Input.value = result.thumbColor1;
         if (result.thumbColor2) thumbColor2Input.value = result.thumbColor2;
     });
@@ -76,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     trackColorInput.addEventListener('input', (e) => chrome.storage.local.set({ trackColor: e.target.value }));
+    trackColor2Input.addEventListener('input', (e) => chrome.storage.local.set({ trackColor2: e.target.value }));
     thumbColor1Input.addEventListener('input', (e) => chrome.storage.local.set({ thumbColor1: e.target.value }));
     thumbColor2Input.addEventListener('input', (e) => chrome.storage.local.set({ thumbColor2: e.target.value }));
 
