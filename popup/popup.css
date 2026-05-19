@@ -476,3 +476,37 @@ footer {
     text-decoration: none;
 }
 
+/* Creator Badge */
+.creator-badge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 14px;
+    margin-bottom: 8px;
+}
+
+.github-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #fbbf24;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.github-link:hover {
+    color: #f59e0b;
+    text-decoration: underline;
+}
+
+.github-link svg {
+    vertical-align: middle;
+}
+
