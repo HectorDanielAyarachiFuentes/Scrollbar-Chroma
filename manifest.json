@@ -7,9 +7,16 @@
     "background": {
         "scripts": ["background.js"]
     },
+    "icons": {
+        "16": "icon.svg",
+        "32": "icon.svg",
+        "48": "icon.svg",
+        "128": "icon.svg"
+    },
     "action": {
         "default_popup": "popup.html",
-        "default_title": "Scrollbar Reimagined Premium"
+        "default_title": "Scrollbar Reimagined Premium",
+        "default_icon": "icon.svg"
     },
     "options_ui": {
         "page": "popup.html",
