@@ -8,32 +8,28 @@
         "scripts": ["background.js"]
     },
     "icons": {
-        "16": "icon.svg",
-        "32": "icon.svg",
-        "48": "icon.svg",
-        "128": "icon.svg"
+        "16": "assets/icon.svg",
+        "32": "assets/icon.svg",
+        "48": "assets/icon.svg",
+        "128": "assets/icon.svg"
     },
     "action": {
-        "default_popup": "popup.html",
+        "default_popup": "popup/popup.html",
         "default_title": "Scrollbar Reimagined Premium",
-        "default_icon": "icon.svg"
+        "default_icon": "assets/icon.svg"
     },
     "options_ui": {
-        "page": "popup.html",
+        "page": "popup/popup.html",
         "open_in_tab": false
     },
     "sidebar_action": {
         "default_title": "Scrollbar Premium",
-        "default_panel": "popup.html"
+        "default_panel": "popup/popup.html"
     },
     "content_scripts": [
         {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "content.js"
-            ],
+            "matches": ["<all_urls>"],
+            "js": ["content/content.js"],
             "run_at": "document_start"
         }
     ]

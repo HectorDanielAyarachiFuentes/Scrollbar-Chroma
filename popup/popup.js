@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let gradientsData = [];
 
     // Load gradients.json
-    fetch('gradients.json')
+    fetch('../assets/gradients.json')
         .then(res => res.json())
         .then(data => {
             gradientsData = data;
