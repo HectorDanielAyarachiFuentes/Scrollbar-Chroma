@@ -216,10 +216,26 @@
                 <div class="options">
                     <div class="option-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                         <div style="display: flex; justify-content: space-between; width: 100%;">
-                            <span>Grosor (Ancho)</span>
+                            <span>Grosor (Principal)</span>
                             <span id="size-val" style="color: var(--accent-1); font-weight: bold;">14px</span>
                         </div>
                         <input type="range" id="scrollbar-size" min="4" max="30" value="14" style="width: 100%; cursor: pointer;">
+                    </div>
+
+                    <div class="option-item">
+                        <span>Tamaño independiente para internas</span>
+                        <label class="switch small">
+                            <input type="checkbox" id="separate-internal-size">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div id="internal-size-container" style="display: none; flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; width: 100%;">
+                            <span>Grosor (Internas)</span>
+                            <span id="internal-size-val" style="color: var(--accent-1); font-weight: bold;">8px</span>
+                        </div>
+                        <input type="range" id="internal-scrollbar-size" min="2" max="30" value="8" style="width: 100%; cursor: pointer;">
                     </div>
                     <div class="option-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                         <div style="display: flex; justify-content: space-between; width: 100%;">

@@ -21,10 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const presetThumb = document.getElementById('preset-thumb');
     const presetTrack = document.getElementById('preset-track');
 
-    // Dimensions
     const scrollbarSizeInput = document.getElementById('scrollbar-size');
     const scrollbarRadiusInput = document.getElementById('scrollbar-radius');
+    const separateInternalSize = document.getElementById('separate-internal-size');
+    const internalScrollbarSizeInput = document.getElementById('internal-scrollbar-size');
+    const internalSizeContainer = document.getElementById('internal-size-container');
     const sizeVal = document.getElementById('size-val');
+    const internalSizeVal = document.getElementById('internal-size-val');
     const radiusVal = document.getElementById('radius-val');
 
     let gradientsData = [];
@@ -53,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // Load saved settings
-    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius'], (result) => {
+    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius', 'separateInternalSize', 'internalScrollbarSize'], (result) => {
         if (result.extensionEnabled !== undefined) {
             toggleExtension.checked = result.extensionEnabled;
             updateStatus(result.extensionEnabled);
@@ -89,6 +92,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.scrollbarRadius !== undefined) {
             scrollbarRadiusInput.value = result.scrollbarRadius;
             radiusVal.textContent = result.scrollbarRadius + 'px';
+        }
+        if (result.separateInternalSize !== undefined) {
+            separateInternalSize.checked = result.separateInternalSize;
+            internalSizeContainer.style.display = result.separateInternalSize ? 'flex' : 'none';
+        }
+        if (result.internalScrollbarSize !== undefined) {
+            internalScrollbarSizeInput.value = result.internalScrollbarSize;
+            internalSizeVal.textContent = result.internalScrollbarSize + 'px';
         }
     });
 
@@ -182,6 +193,16 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollbarSizeInput.addEventListener('input', (e) => {
         sizeVal.textContent = e.target.value + 'px';
         chrome.storage.local.set({ scrollbarSize: parseInt(e.target.value) });
+    });
+
+    separateInternalSize.addEventListener('change', (e) => {
+        internalSizeContainer.style.display = e.target.checked ? 'flex' : 'none';
+        chrome.storage.local.set({ separateInternalSize: e.target.checked });
+    });
+
+    internalScrollbarSizeInput.addEventListener('input', (e) => {
+        internalSizeVal.textContent = e.target.value + 'px';
+        chrome.storage.local.set({ internalScrollbarSize: parseInt(e.target.value) });
     });
 
     scrollbarRadiusInput.addEventListener('input', (e) => {
