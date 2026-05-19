@@ -141,4 +141,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    // Funcionalidad para abrir en el panel lateral (Sidebar)
+    const openSidebarBtn = document.getElementById('open-sidebar');
+    if (openSidebarBtn) {
+        openSidebarBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (typeof browser !== 'undefined' && browser.sidebarAction) {
+                browser.sidebarAction.open();
+                window.close(); // Cierra el popup original
+            } else {
+                alert('Esta función solo está disponible en navegadores compatibles (Firefox).');
+            }
+        });
+    }
 });

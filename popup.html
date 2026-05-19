@@ -77,8 +77,11 @@
         </div>
 
         <footer>
-            <a href="#" id="open-window" style="text-decoration: none; font-size: 14px; cursor: pointer;" title="Abrir en ventana flotante">🪟</a>
-            <p>Scrollbar Reimagined &copy; 2026</p>
+            <div style="display: flex; gap: 8px;">
+                <a href="#" id="open-window" style="text-decoration: none; font-size: 14px; cursor: pointer; filter: grayscale(100%); transition: 0.2s;" title="Abrir en ventana flotante" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(100%)'">🪟</a>
+                <a href="#" id="open-sidebar" style="text-decoration: none; font-size: 14px; cursor: pointer; filter: grayscale(100%); transition: 0.2s;" title="Abrir en panel lateral" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(100%)'">🗂️</a>
+            </div>
+            <p style="margin-left: -15px;">Scrollbar Reimagined &copy; 2026</p>
             <p class="status" id="status-message">Activo</p>
         </footer>
     </div>
