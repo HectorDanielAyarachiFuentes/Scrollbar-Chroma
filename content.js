@@ -143,7 +143,7 @@ class CustomScrollbar {
                 overflow: 'hidden'
             });
             Object.assign(this.label.style, {
-                color: 'rgba(255,255,255,0.9)',
+                color: 'white',
                 fontSize: '10px',
                 fontWeight: 'bold',
                 fontFamily: 'sans-serif',
@@ -171,10 +171,15 @@ class CustomScrollbar {
                 cursor: 'grab', userSelect: 'none', transition: 'filter 0.2s', overflow: 'hidden'
             });
             Object.assign(this.label.style, {
-                color: 'rgba(255,255,255,0.75)', fontSize: '9px', fontWeight: 'bold',
-                fontFamily: 'sans-serif', whiteSpace: 'nowrap',
-                userSelect: 'none', pointerEvents: 'none',
-                letterSpacing: '1px', display: text ? 'block' : 'none'
+                color: 'white',
+                fontSize: '10px',
+                fontWeight: 'bold',
+                fontFamily: 'sans-serif',
+                whiteSpace: 'nowrap',
+                userSelect: 'none',
+                pointerEvents: 'none',
+                letterSpacing: '2px',
+                display: text ? 'block' : 'none'
             });
         }
         this.label.textContent = text;
@@ -316,11 +321,9 @@ class CustomScrollbar {
         // Hover
         this.thumb.addEventListener('mouseenter', () => {
             if (!this.dragging) this.thumb.style.filter = 'brightness(1.2)';
-            this.label.style.color = 'white';
         });
         this.thumb.addEventListener('mouseleave', () => {
             if (!this.dragging) this.thumb.style.filter = '';
-            this.label.style.color = 'rgba(255,255,255,0.75)';
         });
     }
 
