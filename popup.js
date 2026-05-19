@@ -1,10 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
     const toggleExtension = document.getElementById('toggle-extension');
     const toggleText = document.getElementById('toggle-text');
+    const customTextInput = document.getElementById('custom-text-input');
+    const customTextContainer = document.getElementById('custom-text-container');
     const toggleSync = document.getElementById('toggle-sync');
     const themeBtns = document.querySelectorAll('.theme-btn');
     const statusMessage = document.getElementById('status-message');
     const root = document.documentElement;
+
+    // Detect Firefox to show WebKit compatibility instructions
+    const isFirefox = navigator.userAgent.includes("Firefox");
+    if (isFirefox) {
+        const ffAlert = document.getElementById('firefox-alert');
+        if (ffAlert) ffAlert.classList.add('visible');
+    }
 
     // Tabs
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -56,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // Load saved settings
-    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius', 'separateInternalSize', 'internalScrollbarSize'], (result) => {
+    chrome.storage.local.get(['extensionEnabled', 'showText', 'scrollbarText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius', 'separateInternalSize', 'internalScrollbarSize'], (result) => {
         if (result.extensionEnabled !== undefined) {
             toggleExtension.checked = result.extensionEnabled;
             updateStatus(result.extensionEnabled);
@@ -64,6 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (result.showText !== undefined) {
             toggleText.checked = result.showText;
+            customTextContainer.style.display = result.showText ? 'flex' : 'none';
+        }
+
+        if (result.scrollbarText !== undefined) {
+            customTextInput.value = result.scrollbarText;
         }
 
         if (result.syncBrowserTheme !== undefined) {
@@ -222,6 +236,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toggle Text
     toggleText.addEventListener('change', (e) => {
         chrome.storage.local.set({ showText: e.target.checked });
+        customTextContainer.style.display = e.target.checked ? 'flex' : 'none';
+    });
+
+    customTextInput.addEventListener('input', (e) => {
+        chrome.storage.local.set({ scrollbarText: e.target.value });
     });
 
     // Toggle Sync

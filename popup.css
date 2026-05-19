@@ -296,3 +296,42 @@ footer {
     color: var(--accent-1);
     font-weight: 600;
 }
+
+/* Alerta Firefox Webkit */
+.firefox-alert {
+    background: rgba(249, 115, 22, 0.15);
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 11px;
+    color: #fdba74;
+    display: none;
+}
+.firefox-alert.visible {
+    display: block;
+}
+.firefox-alert summary {
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.firefox-alert ol {
+    margin: 8px 0 0 16px;
+    padding: 0;
+    line-height: 1.45;
+    color: #e2e8f0;
+}
+.firefox-alert code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 10px;
+    color: #ffedd5;
+}
+
