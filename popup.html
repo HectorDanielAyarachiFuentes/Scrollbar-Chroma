@@ -21,7 +21,12 @@
             </label>
         </header>
 
-        <div class="content">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="basic">Básico</button>
+            <button class="tab-btn" data-tab="advanced">Avanzado</button>
+        </div>
+
+        <div class="content tab-content active" id="tab-basic">
             <div class="card">
                 <div class="card-header">
                     <h2>Apariencia</h2>
@@ -72,6 +77,43 @@
                             <input type="checkbox" id="toggle-text" checked>
                             <span class="slider round"></span>
                         </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content tab-content" id="tab-advanced">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Modo Avanzado</h2>
+                </div>
+                <div class="options">
+                    <div class="option-item">
+                        <span>Habilitar colores manuales</span>
+                        <label class="switch small">
+                            <input type="checkbox" id="toggle-advanced-colors">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="advanced-colors-card" style="opacity: 0.5; pointer-events: none;">
+                <div class="card-header">
+                    <h2>Colores Personalizados</h2>
+                </div>
+                <div class="options">
+                    <div class="option-item">
+                        <span>Fondo de la barra (Track)</span>
+                        <input type="color" id="track-color" value="#141418">
+                    </div>
+                    <div class="option-item">
+                        <span>Deslizador (Thumb 1)</span>
+                        <input type="color" id="thumb-color-1" value="#a855f7">
+                    </div>
+                    <div class="option-item">
+                        <span>Deslizador (Thumb 2)</span>
+                        <input type="color" id="thumb-color-2" value="#3b82f6">
                     </div>
                 </div>
             </div>

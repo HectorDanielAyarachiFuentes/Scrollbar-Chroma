@@ -6,8 +6,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusMessage = document.getElementById('status-message');
     const root = document.documentElement;
 
+    // Tabs
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Advanced Colors
+    const toggleAdvancedColors = document.getElementById('toggle-advanced-colors');
+    const trackColorInput = document.getElementById('track-color');
+    const thumbColor1Input = document.getElementById('thumb-color-1');
+    const thumbColor2Input = document.getElementById('thumb-color-2');
+    const advancedColorsCard = document.getElementById('advanced-colors-card');
+
     // Load saved settings
-    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors'], (result) => {
+    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'thumbColor1', 'thumbColor2'], (result) => {
         if (result.extensionEnabled !== undefined) {
             toggleExtension.checked = result.extensionEnabled;
             updateStatus(result.extensionEnabled);
@@ -26,7 +37,47 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.theme) {
             activateTheme(result.theme, !result.syncBrowserTheme); 
         }
+
+        if (result.advancedColorsEnabled !== undefined) {
+            toggleAdvancedColors.checked = result.advancedColorsEnabled;
+            updateAdvancedUI(result.advancedColorsEnabled);
+        }
+        if (result.trackColor) trackColorInput.value = result.trackColor;
+        if (result.thumbColor1) thumbColor1Input.value = result.thumbColor1;
+        if (result.thumbColor2) thumbColor2Input.value = result.thumbColor2;
     });
+
+    // Tab Switching
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            btn.classList.add('active');
+            document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+        });
+    });
+
+    // Advanced Colors Toggle
+    toggleAdvancedColors.addEventListener('change', (e) => {
+        const isAdvanced = e.target.checked;
+        chrome.storage.local.set({ advancedColorsEnabled: isAdvanced });
+        updateAdvancedUI(isAdvanced);
+    });
+
+    function updateAdvancedUI(isAdvanced) {
+        if (isAdvanced) {
+            advancedColorsCard.style.opacity = '1';
+            advancedColorsCard.style.pointerEvents = 'auto';
+        } else {
+            advancedColorsCard.style.opacity = '0.5';
+            advancedColorsCard.style.pointerEvents = 'none';
+        }
+    }
+
+    trackColorInput.addEventListener('input', (e) => chrome.storage.local.set({ trackColor: e.target.value }));
+    thumbColor1Input.addEventListener('input', (e) => chrome.storage.local.set({ thumbColor1: e.target.value }));
+    thumbColor2Input.addEventListener('input', (e) => chrome.storage.local.set({ thumbColor2: e.target.value }));
 
     // Toggle Extension
     toggleExtension.addEventListener('change', (e) => {

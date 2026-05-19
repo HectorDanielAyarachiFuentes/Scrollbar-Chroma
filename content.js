@@ -31,15 +31,21 @@ function updateScrollbar(settings) {
     
     document.documentElement.classList.add('scrollbar-premium-active');
 
-    let c1, c2;
+    let c1, c2, trackColor;
     
-    if (settings.syncBrowserTheme && settings.browserThemeColors) {
+    if (settings.advancedColorsEnabled) {
+        c1 = settings.thumbColor1 || '#a855f7';
+        c2 = settings.thumbColor2 || '#3b82f6';
+        trackColor = settings.trackColor || '#141418';
+    } else if (settings.syncBrowserTheme && settings.browserThemeColors) {
         c1 = settings.browserThemeColors.c1;
         c2 = settings.browserThemeColors.c2;
+        trackColor = 'rgba(128, 128, 128, 0.1)';
     } else {
         const theme = themes[settings.theme] || themes.purple;
         c1 = theme.c1;
         c2 = theme.c2;
+        trackColor = 'rgba(128, 128, 128, 0.1)';
     }
     
     // Construimos el SVG dependiendo de si el texto está activado
@@ -59,7 +65,7 @@ function updateScrollbar(settings) {
         /* Configuración global para Firefox */
         html.scrollbar-premium-active {
             scrollbar-width: thin !important;
-            scrollbar-color: ${c1} ${c2} !important;
+            scrollbar-color: ${c1} ${settings.advancedColorsEnabled ? trackColor : c2} !important;
         }
 
         /* Contenedor principal del scroll (Chrome/Edge/Safari) */
@@ -71,7 +77,7 @@ function updateScrollbar(settings) {
 
         /* La pista de fondo */
         html.scrollbar-premium-active::-webkit-scrollbar-track {
-            background: rgba(128, 128, 128, 0.1) !important;
+            background: ${trackColor} !important;
         }
 
         /* El deslizador */
@@ -103,13 +109,17 @@ function updateScrollbar(settings) {
 }
 
 // Inicialización: cargar datos guardados
-chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors'], (result) => {
+chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'thumbColor1', 'thumbColor2'], (result) => {
     const settings = {
         extensionEnabled: result.extensionEnabled !== false, // Por defecto true
         showText: result.showText !== false, // Por defecto true
         theme: result.theme || 'purple',
         syncBrowserTheme: result.syncBrowserTheme || false,
-        browserThemeColors: result.browserThemeColors || null
+        browserThemeColors: result.browserThemeColors || null,
+        advancedColorsEnabled: result.advancedColorsEnabled || false,
+        trackColor: result.trackColor || '#141418',
+        thumbColor1: result.thumbColor1 || '#a855f7',
+        thumbColor2: result.thumbColor2 || '#3b82f6'
     };
     updateScrollbar(settings);
 });
@@ -117,13 +127,17 @@ chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserT
 // Escuchar cambios desde el popup en tiempo real
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'local') {
-        chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors'], (result) => {
+        chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'thumbColor1', 'thumbColor2'], (result) => {
             const settings = {
                 extensionEnabled: result.extensionEnabled !== false,
                 showText: result.showText !== false,
                 theme: result.theme || 'purple',
                 syncBrowserTheme: result.syncBrowserTheme || false,
-                browserThemeColors: result.browserThemeColors || null
+                browserThemeColors: result.browserThemeColors || null,
+                advancedColorsEnabled: result.advancedColorsEnabled || false,
+                trackColor: result.trackColor || '#141418',
+                thumbColor1: result.thumbColor1 || '#a855f7',
+                thumbColor2: result.thumbColor2 || '#3b82f6'
             };
             updateScrollbar(settings);
         });
