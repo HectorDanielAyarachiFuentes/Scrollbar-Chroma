@@ -19,12 +19,19 @@ function updateBrowserThemeColors() {
             if (themeInfo && themeInfo.colors) {
                 const colors = themeInfo.colors;
                 
-                // Extraer y normalizar colores (Firefox puede devolver arrays [r,g,b] en lugar de strings)
-                let rawC1 = colors.tab_line || colors.toolbar || colors.frame;
-                let rawC2 = colors.toolbar_field || colors.accentcolor || colors.tab_background_text;
+                // Extraer colores de manera más robusta, priorizando fondos (frame, toolbar) y evitando textos
+                let rawC1 = colors.frame || colors.accentcolor || colors.toolbar || colors.tab_line;
+                let rawC2 = colors.toolbar || colors.toolbar_field || colors.tab_line || rawC1; // Si no hay secundario, usar el mismo que C1
                 
                 if (rawC1) c1 = normalizeColor(rawC1) || c1;
                 if (rawC2) c2 = normalizeColor(rawC2) || c2;
+            }
+            
+            // Si el tema devuelve un objeto vacío (tema por defecto), intentaremos usar un gris neutro o dejar los default
+            if (!themeInfo || !themeInfo.colors || Object.keys(themeInfo.colors).length === 0) {
+                // Para el tema por defecto de Firefox que a veces no devuelve colores explícitos
+                c1 = '#474749'; // dark grey
+                c2 = '#2b2a33'; // darker grey
             }
             
             chrome.storage.local.set({

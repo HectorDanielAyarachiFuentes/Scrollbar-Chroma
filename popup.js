@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const root = document.documentElement;
 
     // Load saved settings
-    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme'], (result) => {
+    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors'], (result) => {
         if (result.extensionEnabled !== undefined) {
             toggleExtension.checked = result.extensionEnabled;
             updateStatus(result.extensionEnabled);
@@ -17,13 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleText.checked = result.showText;
         }
 
-        if (result.theme) {
-            activateTheme(result.theme);
-        }
-
         if (result.syncBrowserTheme !== undefined) {
             toggleSync.checked = result.syncBrowserTheme;
-            updateSyncUI(result.syncBrowserTheme);
+            updateSyncUI(result.syncBrowserTheme, result.browserThemeColors);
+        }
+        
+        // Always activate the theme visually if sync is off or browserThemeColors missing
+        if (result.theme) {
+            activateTheme(result.theme, !result.syncBrowserTheme); 
         }
     });
 
@@ -45,7 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleSync.addEventListener('change', (e) => {
         const isSync = e.target.checked;
         chrome.storage.local.set({ syncBrowserTheme: isSync });
-        updateSyncUI(isSync);
+        chrome.storage.local.get(['browserThemeColors'], (result) => {
+            updateSyncUI(isSync, result.browserThemeColors);
+        });
+    });
+
+    // Escuchar si el background script actualiza los colores del tema de Firefox
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+        if (namespace === 'local' && changes.browserThemeColors && toggleSync.checked) {
+            updateSyncUI(true, changes.browserThemeColors.newValue);
+        }
     });
 
     // Theme Selection
@@ -57,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function activateTheme(themeName) {
+    function activateTheme(themeName, applyVariables = true) {
         themeBtns.forEach(btn => btn.classList.remove('active'));
         const activeBtn = document.querySelector(`.theme-btn[data-theme="${themeName}"]`);
         if (activeBtn) {
@@ -67,21 +77,36 @@ document.addEventListener('DOMContentLoaded', () => {
             const color1 = activeBtn.style.getPropertyValue('--t-color-1');
             const color2 = activeBtn.style.getPropertyValue('--t-color-2');
             
-            if (color1 && color2) {
+            if (applyVariables && color1 && color2) {
                 root.style.setProperty('--accent-1', color1.trim());
                 root.style.setProperty('--accent-2', color2.trim());
             }
         }
     }
 
-    function updateSyncUI(isSync) {
+    function updateSyncUI(isSync, browserThemeColors) {
         const themesContainer = document.querySelector('.themes');
         if (isSync) {
             themesContainer.style.opacity = '0.5';
             themesContainer.style.pointerEvents = 'none';
+            // Aplicar colores del tema del navegador si existen
+            if (browserThemeColors && browserThemeColors.c1 && browserThemeColors.c2) {
+                root.style.setProperty('--accent-1', browserThemeColors.c1);
+                root.style.setProperty('--accent-2', browserThemeColors.c2);
+            }
         } else {
             themesContainer.style.opacity = '1';
             themesContainer.style.pointerEvents = 'auto';
+            // Restaurar colores del tema seleccionado actualmente
+            const activeBtn = document.querySelector('.theme-btn.active');
+            if (activeBtn) {
+                const color1 = activeBtn.style.getPropertyValue('--t-color-1');
+                const color2 = activeBtn.style.getPropertyValue('--t-color-2');
+                if (color1 && color2) {
+                    root.style.setProperty('--accent-1', color1.trim());
+                    root.style.setProperty('--accent-2', color2.trim());
+                }
+            }
         }
     }
 
