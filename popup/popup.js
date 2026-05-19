@@ -44,6 +44,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const thumbMinSizeInput = document.getElementById('thumb-min-size');
     const thumbMinVal = document.getElementById('thumb-min-val');
 
+    // ── Live preview ──────────────────────────────────────────────
+    const previewThumb = document.getElementById('preview-thumb');
+    function updateDimensionPreview() {
+        if (!previewThumb) return;
+        const size   = scrollbarSizeInput   ? parseInt(scrollbarSizeInput.value)   : 14;
+        const radius = scrollbarRadiusInput ? parseInt(scrollbarRadiusInput.value) : 10;
+        previewThumb.style.width        = `${size}px`;
+        previewThumb.style.borderRadius = `${radius}px`;
+    }
+    if (scrollbarSizeInput)   scrollbarSizeInput.addEventListener('input',   updateDimensionPreview);
+    if (scrollbarRadiusInput) scrollbarRadiusInput.addEventListener('input', updateDimensionPreview);
+    updateDimensionPreview();
+
     let gradientsData = [];
 
     // Load gradients.json
