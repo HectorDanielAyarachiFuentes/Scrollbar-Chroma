@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "Scrollbar Reimagined Premium",
+    "version": "1.0",
+    "description": "Transforma la barra de scroll convencional en una barra de diseño premium con gradientes y texto SVG.",
+    "permissions": ["storage", "theme"],
+    "background": {
+        "scripts": ["background.js"]
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Scrollbar Reimagined Premium"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start"
+        }
+    ]
+}
