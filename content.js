@@ -93,25 +93,29 @@ function updateScrollbar(settings) {
     // Reglas CSS dinámicas
     const cssText = `
         /* Configuración global para Firefox */
-        html.scrollbar-premium-active {
+        html.scrollbar-premium-active,
+        html.scrollbar-premium-active * {
             scrollbar-width: ${firefoxWidth} !important;
             scrollbar-color: ${c1} ${settings.advancedColorsEnabled ? trackColor : c2} !important;
         }
 
         /* Contenedor principal del scroll (Chrome/Edge/Safari) */
-        html.scrollbar-premium-active::-webkit-scrollbar {
+        html.scrollbar-premium-active::-webkit-scrollbar,
+        html.scrollbar-premium-active *::-webkit-scrollbar {
             width: ${widthPx}px !important;
             height: ${widthPx}px !important;
             background: transparent !important;
         }
 
         /* La pista de fondo */
-        html.scrollbar-premium-active::-webkit-scrollbar-track {
+        html.scrollbar-premium-active::-webkit-scrollbar-track,
+        html.scrollbar-premium-active *::-webkit-scrollbar-track {
             background: ${trackBgGradient} !important;
         }
 
         /* El deslizador */
-        html.scrollbar-premium-active::-webkit-scrollbar-thumb {
+        html.scrollbar-premium-active::-webkit-scrollbar-thumb,
+        html.scrollbar-premium-active *::-webkit-scrollbar-thumb {
             background-image: url("${svgNormal}"), ${thumbBgGradient} !important;
             background-color: transparent !important;
             background-repeat: no-repeat, no-repeat !important;
@@ -124,13 +128,15 @@ function updateScrollbar(settings) {
         }
 
         /* Efecto Hover */
-        html.scrollbar-premium-active::-webkit-scrollbar-thumb:hover {
+        html.scrollbar-premium-active::-webkit-scrollbar-thumb:hover,
+        html.scrollbar-premium-active *::-webkit-scrollbar-thumb:hover {
             background-image: url("${svgHover}"), ${thumbBgGradient} !important;
             filter: brightness(1.1);
         }
 
         /* Cuando el usuario está arrastrando la barra */
-        html.scrollbar-premium-active::-webkit-scrollbar-thumb:active {
+        html.scrollbar-premium-active::-webkit-scrollbar-thumb:active,
+        html.scrollbar-premium-active *::-webkit-scrollbar-thumb:active {
             filter: brightness(0.9);
         }
     `;
