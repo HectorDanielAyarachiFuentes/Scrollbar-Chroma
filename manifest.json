@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Scrollbar Reimagined Premium",
+    "name": "Scrollbar Chroma",
     "version": "1.0",
-    "description": "Transforma la barra de scroll convencional en una barra de diseño premium con gradientes y texto SVG.",
+    "description": "Transforma la barra de scroll en una barra de diseño premium con gradientes, colores y texto personalizado.",
     "browser_specific_settings": {
         "gecko": {
             "strict_min_version": "142.0"
@@ -20,7 +20,7 @@
     },
     "action": {
         "default_popup": "popup/popup.html",
-        "default_title": "Scrollbar Reimagined Premium",
+        "default_title": "Scrollbar Chroma",
         "default_icon": "assets/icon.svg"
     },
     "options_ui": {
@@ -28,7 +28,7 @@
         "open_in_tab": false
     },
     "sidebar_action": {
-        "default_title": "Scrollbar Premium",
+        "default_title": "Scrollbar Chroma",
         "default_panel": "popup/popup.html"
     },
     "content_scripts": [
