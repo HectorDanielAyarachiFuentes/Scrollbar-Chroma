@@ -138,14 +138,15 @@ class CustomScrollbar {
         if (this.axis === 'y') {
             Object.assign(this.track.style, {
                 width: `${width}px`, background: trackBg,
-                borderRadius: `${radius}px`, overflow: 'hidden', cursor: 'pointer'
+                borderRadius: `${radius}px`, overflow: 'hidden', cursor: 'pointer',
+                pointerEvents: 'none'
             });
             Object.assign(this.thumb.style, {
                 background: thumbGrad, borderRadius: `${radius}px`,
                 width: '100%', position: 'absolute', left: '0',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'grab', userSelect: 'none', transition: 'filter 0.2s',
-                overflow: 'hidden'
+                overflow: 'hidden', pointerEvents: 'auto'
             });
             Object.assign(this.label.style, {
                 color: 'white',
@@ -167,13 +168,15 @@ class CustomScrollbar {
             // Horizontal
             Object.assign(this.track.style, {
                 height: `${width}px`, background: trackBg,
-                borderRadius: `${radius}px`, overflow: 'hidden', cursor: 'pointer'
+                borderRadius: `${radius}px`, overflow: 'hidden', cursor: 'pointer',
+                pointerEvents: 'none'
             });
             Object.assign(this.thumb.style, {
                 background: thumbGrad, borderRadius: `${radius}px`,
                 height: '100%', position: 'absolute', top: '0',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'grab', userSelect: 'none', transition: 'filter 0.2s', overflow: 'hidden'
+                cursor: 'grab', userSelect: 'none', transition: 'filter 0.2s',
+                overflow: 'hidden', pointerEvents: 'auto'
             });
             Object.assign(this.label.style, {
                 color: 'white',
@@ -192,19 +195,20 @@ class CustomScrollbar {
 
     // ── Scroll info ──
     _info() {
+        const body = document.body;
         if (this.axis === 'y') {
             return this.isMain
                 ? { 
-                    pos: window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0, 
-                    total: Math.max(document.documentElement.scrollHeight, document.body.scrollHeight), 
+                    pos: window.pageYOffset || document.documentElement.scrollTop || (body ? body.scrollTop : 0) || 0, 
+                    total: Math.max(document.documentElement.scrollHeight, body ? body.scrollHeight : 0), 
                     client: window.innerHeight 
                   }
                 : { pos: this.target.scrollTop, total: this.target.scrollHeight, client: this.target.clientHeight };
         } else {
             return this.isMain
                 ? { 
-                    pos: window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0, 
-                    total: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth), 
+                    pos: window.pageXOffset || document.documentElement.scrollLeft || (body ? body.scrollLeft : 0) || 0, 
+                    total: Math.max(document.documentElement.scrollWidth, body ? body.scrollWidth : 0), 
                     client: window.innerWidth 
                   }
                 : { pos: this.target.scrollLeft, total: this.target.scrollWidth, client: this.target.clientWidth };
@@ -370,11 +374,10 @@ function injectGlobalStyle() {
         (document.head || document.documentElement).appendChild(el);
     }
     el.textContent = `
-        html, body { scrollbar-width: none !important; }
-        html::-webkit-scrollbar, body::-webkit-scrollbar { display:none!important; width:0!important; height:0!important; }
+        html { scrollbar-width: none !important; }
+        html::-webkit-scrollbar { display:none!important; width:0!important; height:0!important; }
         .sp-hide-scroll { scrollbar-width: none !important; }
         .sp-hide-scroll::-webkit-scrollbar { display:none!important; width:0!important; height:0!important; }
-        body { overflow-x: hidden; }
     `;
 }
 
