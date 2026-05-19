@@ -55,10 +55,14 @@ function getStyleValues(settings, isMain) {
         thumbGrad = `linear-gradient(180deg, ${c1}, ${c2})`;
         trackBg   = 'rgba(128,128,128,0.1)';
     } else {
-        const t = themes[settings.theme] || themes.purple;
-        thumbGrad = t.gradient
-            ? `linear-gradient(180deg, ${t.gradient})`
-            : `linear-gradient(180deg, ${t.c1}, ${t.c2})`;
+        let colors = ['#a855f7', '#3b82f6']; // default
+        if (settings.themeColors && Array.isArray(settings.themeColors) && settings.themeColors.length > 0) {
+            colors = settings.themeColors;
+        } else {
+            const t = themes[settings.theme] || themes.purple;
+            colors = t.gradient ? t.gradient.split(',').map(c => c.trim()) : [t.c1, t.c2];
+        }
+        thumbGrad = `linear-gradient(180deg, ${colors.join(', ')})`;
         trackBg = 'rgba(128,128,128,0.08)';
     }
 
@@ -510,6 +514,7 @@ function buildSettings(result) {
         showTextInternal:            result.showTextInternal !== false,
         scrollbarText:               result.scrollbarText || '',
         theme:                       result.theme || 'purple',
+        themeColors:                 result.themeColors || null,
         syncBrowserTheme:            result.syncBrowserTheme || false,
         browserThemeColors:          result.browserThemeColors || null,
         advancedColorsEnabled:       result.advancedColorsEnabled || false,
@@ -529,7 +534,7 @@ function buildSettings(result) {
 }
 
 const STORAGE_KEYS = [
-    'extensionEnabled','showText','showTextInternal','scrollbarText','theme','syncBrowserTheme',
+    'extensionEnabled','showText','showTextInternal','scrollbarText','theme','themeColors','syncBrowserTheme',
     'browserThemeColors','advancedColorsEnabled','trackColor','trackColor2',
     'thumbColor1','thumbColor2','advancedThumbGradientString','advancedTrackGradientString',
     'scrollbarSize','scrollbarRadius','separateInternalSize','internalScrollbarSize','thumbMinSize',

@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const customTextInput = document.getElementById('custom-text-input');
     const customTextContainer = document.getElementById('custom-text-container');
     const toggleSync = document.getElementById('toggle-sync');
-    const themeBtns = document.querySelectorAll('.theme-btn');
     const statusMessage = document.getElementById('status-message');
     const root = document.documentElement;
 
@@ -60,6 +59,78 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDimensionPreview();
 
     let gradientsData = [];
+    let activeThemeName = 'Purple';
+
+    const gradientGrid = document.getElementById('gradient-grid');
+    const activeThemeDisplay = document.getElementById('active-theme-display');
+    const gradientSearch = document.getElementById('gradient-search');
+
+    function renderGradients(query = '') {
+        if (!gradientGrid) return;
+        gradientGrid.innerHTML = '';
+        const lowerQuery = query.toLowerCase().trim();
+
+        gradientsData.forEach((grad) => {
+            if (lowerQuery && !grad.name.toLowerCase().includes(lowerQuery)) {
+                return;
+            }
+
+            const item = document.createElement('div');
+            item.className = 'gradient-item';
+            item.title = grad.name;
+            if (grad.name.toLowerCase() === activeThemeName.toLowerCase()) {
+                item.classList.add('active');
+                if (activeThemeDisplay) activeThemeDisplay.textContent = grad.name;
+            }
+
+            const preview = document.createElement('span');
+            preview.className = 'gradient-item-preview';
+            const colors = grad.colors || [];
+            if (colors.length === 1) {
+                preview.style.backgroundColor = colors[0];
+            } else if (colors.length > 1) {
+                preview.style.background = `linear-gradient(135deg, ${colors.join(', ')})`;
+            }
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'gradient-item-name';
+            nameSpan.textContent = grad.name;
+
+            item.appendChild(preview);
+            item.appendChild(nameSpan);
+
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.gradient-item').forEach(el => el.classList.remove('active'));
+                item.classList.add('active');
+                activeThemeName = grad.name;
+                if (activeThemeDisplay) activeThemeDisplay.textContent = grad.name;
+
+                chrome.storage.local.set({
+                    theme: grad.name,
+                    themeColors: grad.colors
+                });
+
+                if (colors.length > 0) {
+                    const c1 = colors[0];
+                    const c2 = colors[colors.length - 1];
+                    chrome.storage.local.get(['syncBrowserTheme'], (syncRes) => {
+                        if (!syncRes.syncBrowserTheme) {
+                            root.style.setProperty('--accent-1', c1);
+                            root.style.setProperty('--accent-2', c2);
+                        }
+                    });
+                }
+            });
+
+            gradientGrid.appendChild(item);
+        });
+    }
+
+    if (gradientSearch) {
+        gradientSearch.addEventListener('input', (e) => {
+            renderGradients(e.target.value);
+        });
+    }
 
     // Load gradients.json
     fetch('../assets/gradients.json')
@@ -77,10 +148,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt2.textContent = grad.name;
                 presetTrack.appendChild(opt2);
             });
+
+            renderGradients();
+
             // Try to set selections after loading
-            chrome.storage.local.get(['advancedThumbGradientIndex', 'advancedTrackGradientIndex'], (r) => {
+            chrome.storage.local.get(['advancedThumbGradientIndex', 'advancedTrackGradientIndex', 'theme'], (r) => {
                 if (r.advancedThumbGradientIndex !== undefined) presetThumb.value = r.advancedThumbGradientIndex;
                 if (r.advancedTrackGradientIndex !== undefined) presetTrack.value = r.advancedTrackGradientIndex;
+                if (r.theme !== undefined) {
+                    activeThemeName = r.theme;
+                    renderGradients();
+                    activateTheme(r.theme, !toggleSync.checked);
+                    setTimeout(() => {
+                        const activeEl = document.querySelector('.gradient-item.active');
+                        if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
+                    }, 100);
+                }
             });
         });
 
@@ -317,54 +400,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Theme Selection
-    themeBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const theme = btn.getAttribute('data-theme');
-            activateTheme(theme);
-            chrome.storage.local.set({ theme: theme });
-        });
-    });
-
     function activateTheme(themeName, applyVariables = true) {
-        themeBtns.forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.querySelector(`.theme-btn[data-theme="${themeName}"]`);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-            
-            // Update popup accent colors based on selected theme
-            const color1 = activeBtn.style.getPropertyValue('--t-color-1');
-            const color2 = activeBtn.style.getPropertyValue('--t-color-2');
-            
-            if (applyVariables && color1 && color2) {
-                root.style.setProperty('--accent-1', color1.trim());
-                root.style.setProperty('--accent-2', color2.trim());
+        activeThemeName = themeName;
+        if (activeThemeDisplay) activeThemeDisplay.textContent = themeName;
+
+        // Update active class on grid items
+        document.querySelectorAll('.gradient-item').forEach(el => {
+            if (el.title.toLowerCase() === themeName.toLowerCase()) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        });
+
+        // Find color values
+        const grad = gradientsData.find(g => g.name.toLowerCase() === themeName.toLowerCase());
+        if (grad && grad.colors && grad.colors.length > 0) {
+            const c1 = grad.colors[0];
+            const c2 = grad.colors[grad.colors.length - 1];
+            if (applyVariables) {
+                root.style.setProperty('--accent-1', c1);
+                root.style.setProperty('--accent-2', c2);
             }
         }
     }
 
     function updateSyncUI(isSync, browserThemeColors) {
-        const themesContainer = document.querySelector('.themes');
+        const gridContainer = document.getElementById('gradient-grid');
+        const searchInput = document.getElementById('gradient-search');
+        const headerRow = document.querySelector('.gradient-header-row');
+        
         if (isSync) {
-            themesContainer.style.opacity = '0.5';
-            themesContainer.style.pointerEvents = 'none';
-            // Aplicar colores del tema del navegador si existen
+            if (gridContainer) {
+                gridContainer.style.opacity = '0.4';
+                gridContainer.style.pointerEvents = 'none';
+            }
+            if (headerRow) {
+                headerRow.style.opacity = '0.4';
+                headerRow.style.pointerEvents = 'none';
+            }
             if (browserThemeColors && browserThemeColors.c1 && browserThemeColors.c2) {
                 root.style.setProperty('--accent-1', browserThemeColors.c1);
                 root.style.setProperty('--accent-2', browserThemeColors.c2);
             }
         } else {
-            themesContainer.style.opacity = '1';
-            themesContainer.style.pointerEvents = 'auto';
-            // Restaurar colores del tema seleccionado actualmente
-            const activeBtn = document.querySelector('.theme-btn.active');
-            if (activeBtn) {
-                const color1 = activeBtn.style.getPropertyValue('--t-color-1');
-                const color2 = activeBtn.style.getPropertyValue('--t-color-2');
-                if (color1 && color2) {
-                    root.style.setProperty('--accent-1', color1.trim());
-                    root.style.setProperty('--accent-2', color2.trim());
-                }
+            if (gridContainer) {
+                gridContainer.style.opacity = '1';
+                gridContainer.style.pointerEvents = 'auto';
+            }
+            if (headerRow) {
+                headerRow.style.opacity = '1';
+                headerRow.style.pointerEvents = 'auto';
+            }
+            // Restore active theme colors
+            const grad = gradientsData.find(g => g.name.toLowerCase() === activeThemeName.toLowerCase());
+            if (grad && grad.colors && grad.colors.length > 0) {
+                root.style.setProperty('--accent-1', grad.colors[0]);
+                root.style.setProperty('--accent-2', grad.colors[grad.colors.length - 1]);
             }
         }
     }
