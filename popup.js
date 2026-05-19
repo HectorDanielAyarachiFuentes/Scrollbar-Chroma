@@ -21,6 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const presetThumb = document.getElementById('preset-thumb');
     const presetTrack = document.getElementById('preset-track');
 
+    // Dimensions
+    const scrollbarSizeInput = document.getElementById('scrollbar-size');
+    const scrollbarRadiusInput = document.getElementById('scrollbar-radius');
+    const sizeVal = document.getElementById('size-val');
+    const radiusVal = document.getElementById('radius-val');
+
     let gradientsData = [];
 
     // Load gradients.json
@@ -47,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // Load saved settings
-    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2'], (result) => {
+    chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius'], (result) => {
         if (result.extensionEnabled !== undefined) {
             toggleExtension.checked = result.extensionEnabled;
             updateStatus(result.extensionEnabled);
@@ -75,6 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.trackColor2) trackColor2Input.value = result.trackColor2;
         if (result.thumbColor1) thumbColor1Input.value = result.thumbColor1;
         if (result.thumbColor2) thumbColor2Input.value = result.thumbColor2;
+
+        if (result.scrollbarSize !== undefined) {
+            scrollbarSizeInput.value = result.scrollbarSize;
+            sizeVal.textContent = result.scrollbarSize + 'px';
+        }
+        if (result.scrollbarRadius !== undefined) {
+            scrollbarRadiusInput.value = result.scrollbarRadius;
+            radiusVal.textContent = result.scrollbarRadius + 'px';
+        }
     });
 
     // Tab Switching
@@ -162,6 +177,16 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.storage.local.set({ thumbColor2: e.target.value });
         chrome.storage.local.remove(['advancedThumbGradientString', 'advancedThumbGradientIndex']);
         presetThumb.value = "";
+    });
+
+    scrollbarSizeInput.addEventListener('input', (e) => {
+        sizeVal.textContent = e.target.value + 'px';
+        chrome.storage.local.set({ scrollbarSize: parseInt(e.target.value) });
+    });
+
+    scrollbarRadiusInput.addEventListener('input', (e) => {
+        radiusVal.textContent = e.target.value + 'px';
+        chrome.storage.local.set({ scrollbarRadius: parseInt(e.target.value) });
     });
 
     // Toggle Extension

@@ -73,6 +73,11 @@ function updateScrollbar(settings) {
     const thumbBgGradient = customGradient ? `linear-gradient(180deg, ${customGradient})` : `linear-gradient(180deg, ${c1}, ${c2})`;
     const trackBgGradient = trackCustomGradient ? `linear-gradient(180deg, ${trackCustomGradient})` : `linear-gradient(180deg, ${trackColor}, ${trackColor2})`;
     
+    // Dimensiones
+    const widthPx = settings.scrollbarSize;
+    const radiusPx = settings.scrollbarRadius;
+    const firefoxWidth = widthPx < 12 ? 'thin' : 'auto';
+    
     // Construimos el SVG dependiendo de si el texto está activado
     const svgText = settings.showText !== false 
         ? `<text x='50%' y='55%' font-family='sans-serif' font-size='7' font-weight='bold' fill='white' opacity='0.6' text-anchor='middle' transform='rotate(-90 6 15)'>NAV</text>` 
@@ -89,14 +94,14 @@ function updateScrollbar(settings) {
     const cssText = `
         /* Configuración global para Firefox */
         html.scrollbar-premium-active {
-            scrollbar-width: thin !important;
+            scrollbar-width: ${firefoxWidth} !important;
             scrollbar-color: ${c1} ${settings.advancedColorsEnabled ? trackColor : c2} !important;
         }
 
         /* Contenedor principal del scroll (Chrome/Edge/Safari) */
         html.scrollbar-premium-active::-webkit-scrollbar {
-            width: 14px !important;
-            height: 14px !important;
+            width: ${widthPx}px !important;
+            height: ${widthPx}px !important;
             background: transparent !important;
         }
 
@@ -112,7 +117,7 @@ function updateScrollbar(settings) {
             background-repeat: no-repeat, no-repeat !important;
             background-position: center, center !important;
             background-size: contain, auto !important;
-            border-radius: 10px !important;
+            border-radius: ${radiusPx}px !important;
             border: 3px solid transparent !important;
             background-clip: padding-box !important;
             transition: all 0.3s ease-in-out !important;
@@ -134,7 +139,7 @@ function updateScrollbar(settings) {
 }
 
 // Inicialización: cargar datos guardados
-chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'advancedThumbGradientString', 'advancedTrackGradientString'], (result) => {
+chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'advancedThumbGradientString', 'advancedTrackGradientString', 'scrollbarSize', 'scrollbarRadius'], (result) => {
     const settings = {
         extensionEnabled: result.extensionEnabled !== false, // Por defecto true
         showText: result.showText !== false, // Por defecto true
@@ -147,7 +152,9 @@ chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserT
         thumbColor1: result.thumbColor1 || '#a855f7',
         thumbColor2: result.thumbColor2 || '#3b82f6',
         advancedThumbGradientString: result.advancedThumbGradientString || null,
-        advancedTrackGradientString: result.advancedTrackGradientString || null
+        advancedTrackGradientString: result.advancedTrackGradientString || null,
+        scrollbarSize: result.scrollbarSize || 14,
+        scrollbarRadius: result.scrollbarRadius || 10
     };
     updateScrollbar(settings);
 });
@@ -155,7 +162,7 @@ chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserT
 // Escuchar cambios desde el popup en tiempo real
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'local') {
-        chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'advancedThumbGradientString', 'advancedTrackGradientString'], (result) => {
+        chrome.storage.local.get(['extensionEnabled', 'showText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'advancedThumbGradientString', 'advancedTrackGradientString', 'scrollbarSize', 'scrollbarRadius'], (result) => {
             const settings = {
                 extensionEnabled: result.extensionEnabled !== false,
                 showText: result.showText !== false,
@@ -168,7 +175,9 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
                 thumbColor1: result.thumbColor1 || '#a855f7',
                 thumbColor2: result.thumbColor2 || '#3b82f6',
                 advancedThumbGradientString: result.advancedThumbGradientString || null,
-                advancedTrackGradientString: result.advancedTrackGradientString || null
+                advancedTrackGradientString: result.advancedTrackGradientString || null,
+                scrollbarSize: result.scrollbarSize || 14,
+                scrollbarRadius: result.scrollbarRadius || 10
             };
             updateScrollbar(settings);
         });
