@@ -510,3 +510,12 @@ footer {
     vertical-align: middle;
 }
 
+.creator-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid #fbbf24;
+    box-shadow: 0 0 6px rgba(251, 191, 36, 0.3);
+}
+
