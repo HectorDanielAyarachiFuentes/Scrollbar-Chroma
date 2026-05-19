@@ -127,4 +127,18 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.content').style.pointerEvents = 'auto';
         }
     }
+
+    // Funcionalidad para abrir en una ventana flotante separada
+    const openWindowBtn = document.getElementById('open-window');
+    if (openWindowBtn) {
+        openWindowBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            chrome.windows.create({
+                url: 'popup.html',
+                type: 'popup',
+                width: 360,
+                height: 600
+            });
+        });
+    }
 });

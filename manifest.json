@@ -11,6 +11,14 @@
         "default_popup": "popup.html",
         "default_title": "Scrollbar Reimagined Premium"
     },
+    "options_ui": {
+        "page": "popup.html",
+        "open_in_tab": false
+    },
+    "sidebar_action": {
+        "default_title": "Scrollbar Premium",
+        "default_panel": "popup.html"
+    },
     "content_scripts": [
         {
             "matches": [
