@@ -46,12 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Live preview ──────────────────────────────────────────────
     const previewThumb = document.getElementById('preview-thumb');
+    const previewTrack = document.getElementById('preview-track');
     function updateDimensionPreview() {
         if (!previewThumb) return;
         const size   = scrollbarSizeInput   ? parseInt(scrollbarSizeInput.value)   : 14;
         const radius = scrollbarRadiusInput ? parseInt(scrollbarRadiusInput.value) : 10;
         previewThumb.style.width        = `${size}px`;
         previewThumb.style.borderRadius = `${radius}px`;
+        if (previewTrack) previewTrack.style.borderRadius = `${radius}px`;
     }
     if (scrollbarSizeInput)   scrollbarSizeInput.addEventListener('input',   updateDimensionPreview);
     if (scrollbarRadiusInput) scrollbarRadiusInput.addEventListener('input', updateDimensionPreview);

@@ -135,19 +135,27 @@ class CustomScrollbar {
     _applyStyles() {
         const { thumbGrad, trackBg, width, radius, text } = getStyleValues(this.settings, this.isMain);
 
+        // Helper to force-set a style with !important
+        const forceStyle = (el, prop, val) => el.style.setProperty(prop, val, 'important');
+
         if (this.axis === 'y') {
             Object.assign(this.track.style, {
                 width: `${width}px`, background: trackBg,
-                borderRadius: `${radius}px`, overflow: 'hidden', cursor: 'pointer',
+                overflow: 'hidden', cursor: 'pointer',
                 pointerEvents: 'none'
             });
+            forceStyle(this.track, 'border-radius', `${radius}px`);
+
             Object.assign(this.thumb.style, {
-                background: thumbGrad, borderRadius: `${radius}px`,
+                background: thumbGrad,
                 width: '100%', position: 'absolute', left: '0',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'grab', userSelect: 'none', transition: 'filter 0.2s',
+                cursor: 'grab', userSelect: 'none',
+                transition: 'filter 0.2s, border-radius 0.2s',
                 overflow: 'hidden', pointerEvents: 'auto'
             });
+            forceStyle(this.thumb, 'border-radius', `${radius}px`);
+
             Object.assign(this.label.style, {
                 color: 'white',
                 fontSize: '10px',
@@ -168,16 +176,21 @@ class CustomScrollbar {
             // Horizontal
             Object.assign(this.track.style, {
                 height: `${width}px`, background: trackBg,
-                borderRadius: `${radius}px`, overflow: 'hidden', cursor: 'pointer',
+                overflow: 'hidden', cursor: 'pointer',
                 pointerEvents: 'none'
             });
+            forceStyle(this.track, 'border-radius', `${radius}px`);
+
             Object.assign(this.thumb.style, {
-                background: thumbGrad, borderRadius: `${radius}px`,
+                background: thumbGrad,
                 height: '100%', position: 'absolute', top: '0',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'grab', userSelect: 'none', transition: 'filter 0.2s',
+                cursor: 'grab', userSelect: 'none',
+                transition: 'filter 0.2s, border-radius 0.2s',
                 overflow: 'hidden', pointerEvents: 'auto'
             });
+            forceStyle(this.thumb, 'border-radius', `${radius}px`);
+
             Object.assign(this.label.style, {
                 color: 'white',
                 fontSize: '10px',
