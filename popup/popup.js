@@ -375,4 +375,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Lightbox Modal para la imagen del tutorial
+    const openLightbox = document.getElementById('open-lightbox');
+    const lightboxModal = document.getElementById('lightbox-modal');
+    const lightboxClose = document.querySelector('.lightbox-close');
+
+    if (openLightbox && lightboxModal) {
+        openLightbox.addEventListener('click', () => {
+            lightboxModal.classList.add('active');
+        });
+
+        // Cerrar al hacer clic en la X
+        if (lightboxClose) {
+            lightboxClose.addEventListener('click', () => {
+                lightboxModal.classList.remove('active');
+            });
+        }
+
+        // Cerrar al hacer clic fuera de la imagen
+        lightboxModal.addEventListener('click', (e) => {
+            if (e.target === lightboxModal) {
+                lightboxModal.classList.remove('active');
+            }
+        });
+    }
 });

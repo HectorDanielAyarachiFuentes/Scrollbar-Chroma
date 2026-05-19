@@ -315,6 +315,13 @@
                     <div style="background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); border-radius: 10px; padding: 12px;">
                         <p style="margin: 0; font-size: 11px; color: #4ade80; line-height: 1.5;">✅ <strong>Solo necesitás hacerlo una vez.</strong> Firefox recordará la configuración entre sesiones.</p>
                     </div>
+
+                    <div class="tutorial-image-container" id="open-lightbox">
+                        <img src="../assets/ejemplo.jpeg" alt="Tutorial Firefox" class="tutorial-thumb">
+                        <div class="tutorial-overlay">
+                            <span>🔍 Ampliar tutorial</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -328,6 +335,13 @@
             <p class="status" id="status-message">Activo</p>
         </footer>
     </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox-modal" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightbox-img" src="../assets/ejemplo.jpeg" alt="Tutorial Expandido">
+    </div>
+
     <script src="popup.js"></script>
 </body>
 </html>
