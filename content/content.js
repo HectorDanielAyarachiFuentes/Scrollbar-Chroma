@@ -194,11 +194,19 @@ class CustomScrollbar {
     _info() {
         if (this.axis === 'y') {
             return this.isMain
-                ? { pos: window.scrollY, total: document.documentElement.scrollHeight, client: window.innerHeight }
+                ? { 
+                    pos: window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0, 
+                    total: Math.max(document.documentElement.scrollHeight, document.body.scrollHeight), 
+                    client: window.innerHeight 
+                  }
                 : { pos: this.target.scrollTop, total: this.target.scrollHeight, client: this.target.clientHeight };
         } else {
             return this.isMain
-                ? { pos: window.scrollX, total: document.documentElement.scrollWidth, client: window.innerWidth }
+                ? { 
+                    pos: window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0, 
+                    total: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth), 
+                    client: window.innerWidth 
+                  }
                 : { pos: this.target.scrollLeft, total: this.target.scrollWidth, client: this.target.clientWidth };
         }
     }
@@ -262,6 +270,7 @@ class CustomScrollbar {
 
         if (this.isMain) {
             window.addEventListener('scroll', this._onScroll, { passive: true });
+            document.addEventListener('scroll', this._onScroll, { passive: true });
             window.addEventListener('resize', this._onResize, { passive: true });
         } else {
             this.target.addEventListener('scroll', this._onScroll, { passive: true });
@@ -342,6 +351,7 @@ class CustomScrollbar {
         if (this.track.parentNode) this.track.parentNode.removeChild(this.track);
         if (this.isMain) {
             window.removeEventListener('scroll', this._onScroll);
+            document.removeEventListener('scroll', this._onScroll);
             window.removeEventListener('resize', this._onResize);
         } else {
             this.target && this.target.removeEventListener('scroll', this._onScroll);
@@ -360,8 +370,8 @@ function injectGlobalStyle() {
         (document.head || document.documentElement).appendChild(el);
     }
     el.textContent = `
-        html { scrollbar-width: none !important; }
-        html::-webkit-scrollbar { display:none!important; width:0!important; height:0!important; }
+        html, body { scrollbar-width: none !important; }
+        html::-webkit-scrollbar, body::-webkit-scrollbar { display:none!important; width:0!important; height:0!important; }
         .sp-hide-scroll { scrollbar-width: none !important; }
         .sp-hide-scroll::-webkit-scrollbar { display:none!important; width:0!important; height:0!important; }
         body { overflow-x: hidden; }
@@ -403,7 +413,8 @@ function attachInternal(el, settings) {
 }
 
 function scanInternals(settings) {
-    document.querySelectorAll('*').forEach(el => {
+    const selector = 'div, section, article, aside, main, ul, ol, pre, textarea, form, blockquote';
+    document.querySelectorAll(selector).forEach(el => {
         if (!internalScrollbars.has(el) && getScrollAxes(el)) {
             attachInternal(el, settings);
         }
@@ -453,9 +464,18 @@ function disable() {
 }
 
 // ── MutationObserver ─────────────────────────────────────────
+let scanTimeout = null;
+function debouncedScanInternals(settings) {
+    if (scanTimeout) clearTimeout(scanTimeout);
+    scanTimeout = setTimeout(() => {
+        scanInternals(settings);
+    }, 200);
+}
+
+// ── MutationObserver ─────────────────────────────────────────
 const observer = new MutationObserver(() => {
     if (currentSettings && currentSettings.extensionEnabled && currentSettings.enableInternalScrollbars) {
-        scanInternals(currentSettings);
+        debouncedScanInternals(currentSettings);
     }
 });
 observer.observe(document.documentElement, { childList: true, subtree: true });
@@ -488,7 +508,7 @@ function buildSettings(result) {
         separateInternalSize:        result.separateInternalSize || false,
         internalScrollbarSize:       result.internalScrollbarSize || 8,
         thumbMinSize:                result.thumbMinSize || 40,
-        enableInternalScrollbars:    result.enableInternalScrollbars !== false
+        enableInternalScrollbars:    result.enableInternalScrollbars === true
     };
 }
 

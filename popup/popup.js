@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             thumbMinVal.textContent = result.thumbMinSize + 'px';
         }
 
-        let enableInternals = true;
+        let enableInternals = false;
         if (result.enableInternalScrollbars !== undefined) {
             enableInternals = result.enableInternalScrollbars;
         }
