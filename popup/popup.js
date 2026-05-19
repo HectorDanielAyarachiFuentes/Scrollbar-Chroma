@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const toggleExtension = document.getElementById('toggle-extension');
     const toggleText = document.getElementById('toggle-text');
+    const toggleTextInternal = document.getElementById('toggle-text-internal');
     const customTextInput = document.getElementById('custom-text-input');
     const customTextContainer = document.getElementById('custom-text-container');
     const toggleSync = document.getElementById('toggle-sync');
@@ -67,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // Load saved settings
-    chrome.storage.local.get(['extensionEnabled', 'showText', 'scrollbarText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius', 'separateInternalSize', 'internalScrollbarSize'], (result) => {
+    chrome.storage.local.get(['extensionEnabled', 'showText', 'showTextInternal', 'scrollbarText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius', 'separateInternalSize', 'internalScrollbarSize', 'thumbMinSize'], (result) => {
         if (result.extensionEnabled !== undefined) {
             toggleExtension.checked = result.extensionEnabled;
             updateStatus(result.extensionEnabled);
@@ -76,6 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.showText !== undefined) {
             toggleText.checked = result.showText;
             customTextContainer.style.display = result.showText ? 'flex' : 'none';
+        }
+        if (result.showTextInternal !== undefined) {
+            toggleTextInternal.checked = result.showTextInternal;
         }
 
         if (result.scrollbarText !== undefined) {
@@ -248,6 +252,10 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleText.addEventListener('change', (e) => {
         chrome.storage.local.set({ showText: e.target.checked });
         customTextContainer.style.display = e.target.checked ? 'flex' : 'none';
+    });
+
+    toggleTextInternal.addEventListener('change', (e) => {
+        chrome.storage.local.set({ showTextInternal: e.target.checked });
     });
 
     customTextInput.addEventListener('input', (e) => {

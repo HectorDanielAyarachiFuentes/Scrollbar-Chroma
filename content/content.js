@@ -67,7 +67,12 @@ function getStyleValues(settings, isMain) {
         : (settings.separateInternalSize ? settings.internalScrollbarSize : settings.scrollbarSize) || 14;
 
     const radius = settings.scrollbarRadius || 10;
-    const text   = settings.showText !== false ? (settings.scrollbarText || '').toUpperCase() : '';
+
+    // Determine if text should show: main uses showText, internals use showTextInternal
+    const showText = isMain
+        ? settings.showText !== false
+        : settings.showTextInternal !== false && settings.showText !== false;
+    const text = showText ? (settings.scrollbarText || '').toUpperCase() : '';
 
     return { thumbGrad, trackBg, width, radius, text };
 }
@@ -456,6 +461,7 @@ function buildSettings(result) {
     return {
         extensionEnabled:            result.extensionEnabled !== false,
         showText:                    result.showText !== false,
+        showTextInternal:            result.showTextInternal !== false,
         scrollbarText:               result.scrollbarText || '',
         theme:                       result.theme || 'purple',
         syncBrowserTheme:            result.syncBrowserTheme || false,
@@ -476,10 +482,11 @@ function buildSettings(result) {
 }
 
 const STORAGE_KEYS = [
-    'extensionEnabled','showText','scrollbarText','theme','syncBrowserTheme',
+    'extensionEnabled','showText','showTextInternal','scrollbarText','theme','syncBrowserTheme',
     'browserThemeColors','advancedColorsEnabled','trackColor','trackColor2',
     'thumbColor1','thumbColor2','advancedThumbGradientString','advancedTrackGradientString',
-    'scrollbarSize','scrollbarRadius','separateInternalSize','internalScrollbarSize','thumbMinSize'
+    'scrollbarSize','scrollbarRadius','separateInternalSize','internalScrollbarSize','thumbMinSize',
+    'showTextInternal'
 ];
 
 // ── Init ─────────────────────────────────────────────────────

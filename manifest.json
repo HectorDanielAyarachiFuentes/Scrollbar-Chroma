@@ -3,6 +3,11 @@
     "name": "Scrollbar Reimagined Premium",
     "version": "1.0",
     "description": "Transforma la barra de scroll convencional en una barra de diseño premium con gradientes y texto SVG.",
+    "browser_specific_settings": {
+        "gecko": {
+            "strict_min_version": "142.0"
+        }
+    },
     "permissions": ["storage", "theme"],
     "background": {
         "scripts": ["background.js"]
