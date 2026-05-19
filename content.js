@@ -1,12 +1,13 @@
 // ============================================================
-// Scrollbar Premium - DOM Custom Scrollbar Engine
+// Scrollbar Premium - DOM Custom Scrollbar Engine v2
+// Supports: vertical (Y) + horizontal (X) axes, text, gradients
 // ============================================================
 
-const TRACK_CLASS = 'sp-track';
-const THUMB_CLASS = 'sp-thumb';
-const LABEL_CLASS = 'sp-label';
+const TRACK_CLASS  = 'sp-track';
+const THUMB_CLASS  = 'sp-thumb';
+const LABEL_CLASS  = 'sp-label';
 const PROCESSED_ATTR = 'data-sp-done';
-const STYLE_ID = 'sp-global-style';
+const STYLE_ID     = 'sp-global-style';
 
 const themes = {
     purple:      { c1: '#a855f7', c2: '#3b82f6' },
@@ -32,16 +33,17 @@ const themes = {
 };
 
 let currentSettings = null;
-let mainScrollbar = null;
-const internalScrollbars = new Map(); // element -> CustomScrollbar
+let mainScrollbar   = null;
+// Map: element -> [CustomScrollbar, ...]  (could be 1 for Y, 1 for X, or both)
+const internalScrollbars = new Map();
 
-// ── Helper ──────────────────────────────────────────────────
+// ── Compute style values from settings ──────────────────────
 function getStyleValues(settings, isMain) {
-    let c1, c2, thumbGrad, trackBg;
+    let thumbGrad, trackBg;
 
     if (settings.advancedColorsEnabled) {
-        c1 = settings.thumbColor1 || '#a855f7';
-        c2 = settings.thumbColor2 || '#3b82f6';
+        const c1 = settings.thumbColor1 || '#a855f7';
+        const c2 = settings.thumbColor2 || '#3b82f6';
         thumbGrad = settings.advancedThumbGradientString
             ? `linear-gradient(180deg, ${settings.advancedThumbGradientString})`
             : `linear-gradient(180deg, ${c1}, ${c2})`;
@@ -49,44 +51,51 @@ function getStyleValues(settings, isMain) {
             ? `linear-gradient(180deg, ${settings.advancedTrackGradientString})`
             : (settings.trackColor || '#141418');
     } else if (settings.syncBrowserTheme && settings.browserThemeColors) {
-        c1 = settings.browserThemeColors.c1;
-        c2 = settings.browserThemeColors.c2;
+        const { c1, c2 } = settings.browserThemeColors;
         thumbGrad = `linear-gradient(180deg, ${c1}, ${c2})`;
-        trackBg = 'rgba(128,128,128,0.1)';
+        trackBg   = 'rgba(128,128,128,0.1)';
     } else {
         const t = themes[settings.theme] || themes.purple;
-        c1 = t.c1; c2 = t.c2;
         thumbGrad = t.gradient
             ? `linear-gradient(180deg, ${t.gradient})`
-            : `linear-gradient(180deg, ${c1}, ${c2})`;
+            : `linear-gradient(180deg, ${t.c1}, ${t.c2})`;
         trackBg = 'rgba(128,128,128,0.08)';
     }
 
     const width = isMain
         ? (settings.scrollbarSize || 14)
         : (settings.separateInternalSize ? settings.internalScrollbarSize : settings.scrollbarSize) || 14;
+
     const radius = settings.scrollbarRadius || 10;
-    const text = settings.showText !== false ? (settings.scrollbarText || '').toUpperCase() : '';
+    const text   = settings.showText !== false ? (settings.scrollbarText || '').toUpperCase() : '';
 
     return { thumbGrad, trackBg, width, radius, text };
 }
 
-// ── Custom Scrollbar Class ───────────────────────────────────
+// ── CustomScrollbar class ────────────────────────────────────
 class CustomScrollbar {
-    constructor(target, settings, isMain) {
-        this.target   = target;
-        this.isMain   = isMain;
+    /**
+     * @param {Element|Window} target
+     * @param {Object} settings
+     * @param {boolean} isMain - true = viewport scrollbar
+     * @param {'x'|'y'} axis
+     */
+    constructor(target, settings, isMain, axis = 'y') {
+        this.target  = target;
+        this.isMain  = isMain;
+        this.axis    = axis;
         this.settings = settings;
         this.dragging = false;
-        this.dragStartY = 0;
+        this.dragStart = 0;
         this.dragStartScroll = 0;
 
-        this._buildDOM();
+        this._createDOM();
         this._bindEvents();
         this.refresh(settings);
     }
 
-    _buildDOM() {
+    // ── DOM ──
+    _createDOM() {
         this.track = document.createElement('div');
         this.track.className = TRACK_CLASS;
 
@@ -100,107 +109,108 @@ class CustomScrollbar {
         this.track.appendChild(this.thumb);
 
         if (this.isMain) {
-            this.track.style.cssText = `
-                position:fixed !important;
-                right:0 !important;
-                top:0 !important;
-                z-index:2147483647 !important;
-                pointer-events:auto !important;
-            `;
+            const css = this.axis === 'y'
+                ? 'position:fixed!important;right:0!important;top:0!important;z-index:2147483647!important;'
+                : 'position:fixed!important;bottom:0!important;left:0!important;z-index:2147483647!important;';
+            this.track.style.cssText = css;
             document.documentElement.appendChild(this.track);
         } else {
-            this.track.style.cssText = `
-                position:absolute !important;
-                right:0 !important;
-                top:0 !important;
-                z-index:2147483646 !important;
-                pointer-events:auto !important;
-            `;
-            const pos = getComputedStyle(this.target).position;
-            if (pos === 'static') this.target.style.position = 'relative';
+            const css = this.axis === 'y'
+                ? 'position:absolute!important;right:0!important;top:0!important;z-index:2147483646!important;'
+                : 'position:absolute!important;bottom:0!important;left:0!important;z-index:2147483646!important;';
+            this.track.style.cssText = css;
+            if (getComputedStyle(this.target).position === 'static') {
+                this.target.style.position = 'relative';
+            }
             this.target.appendChild(this.track);
         }
     }
 
-    _styleValues() {
-        return getStyleValues(this.settings, this.isMain);
-    }
-
+    // ── Styles ──
     _applyStyles() {
-        const { thumbGrad, trackBg, width, radius, text } = this._styleValues();
+        const { thumbGrad, trackBg, width, radius, text } = getStyleValues(this.settings, this.isMain);
 
-        Object.assign(this.track.style, {
-            width:        `${width}px`,
-            background:   trackBg,
-            borderRadius: `${radius}px`,
-            overflow:     'hidden',
-            cursor:       'pointer'
-        });
-
-        Object.assign(this.thumb.style, {
-            background:   thumbGrad,
-            borderRadius: `${radius}px`,
-            width:        '100%',
-            position:     'absolute',
-            left:         '0',
-            display:      'flex',
-            alignItems:   'center',
-            justifyContent: 'center',
-            cursor:       'grab',
-            userSelect:   'none',
-            transition:   'filter 0.2s',
-            overflow:     'hidden'
-        });
-
-        Object.assign(this.label.style, {
-            color:       'rgba(255,255,255,0.75)',
-            fontSize:    '9px',
-            fontWeight:  'bold',
-            fontFamily:  'sans-serif',
-            transform:   'rotate(-90deg)',
-            whiteSpace:  'nowrap',
-            userSelect:  'none',
-            pointerEvents: 'none',
-            letterSpacing: '1px',
-            display:     text ? 'block' : 'none'
-        });
+        if (this.axis === 'y') {
+            Object.assign(this.track.style, {
+                width: `${width}px`, background: trackBg,
+                borderRadius: `${radius}px`, overflow: 'hidden', cursor: 'pointer'
+            });
+            Object.assign(this.thumb.style, {
+                background: thumbGrad, borderRadius: `${radius}px`,
+                width: '100%', position: 'absolute', left: '0',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'grab', userSelect: 'none', transition: 'filter 0.2s', overflow: 'hidden'
+            });
+            Object.assign(this.label.style, {
+                color: 'rgba(255,255,255,0.75)', fontSize: '9px', fontWeight: 'bold',
+                fontFamily: 'sans-serif', transform: 'rotate(-90deg)',
+                whiteSpace: 'nowrap', userSelect: 'none', pointerEvents: 'none',
+                letterSpacing: '1px', display: text ? 'block' : 'none'
+            });
+        } else {
+            // Horizontal
+            Object.assign(this.track.style, {
+                height: `${width}px`, background: trackBg,
+                borderRadius: `${radius}px`, overflow: 'hidden', cursor: 'pointer'
+            });
+            Object.assign(this.thumb.style, {
+                background: thumbGrad, borderRadius: `${radius}px`,
+                height: '100%', position: 'absolute', top: '0',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'grab', userSelect: 'none', transition: 'filter 0.2s', overflow: 'hidden'
+            });
+            Object.assign(this.label.style, {
+                color: 'rgba(255,255,255,0.75)', fontSize: '9px', fontWeight: 'bold',
+                fontFamily: 'sans-serif', whiteSpace: 'nowrap',
+                userSelect: 'none', pointerEvents: 'none',
+                letterSpacing: '1px', display: text ? 'block' : 'none'
+            });
+        }
         this.label.textContent = text;
     }
 
-    _scrollInfo() {
-        if (this.isMain) {
-            return {
-                scrollTop:    window.scrollY,
-                scrollHeight: document.documentElement.scrollHeight,
-                clientHeight: window.innerHeight
-            };
+    // ── Scroll info ──
+    _info() {
+        if (this.axis === 'y') {
+            return this.isMain
+                ? { pos: window.scrollY, total: document.documentElement.scrollHeight, client: window.innerHeight }
+                : { pos: this.target.scrollTop, total: this.target.scrollHeight, client: this.target.clientHeight };
+        } else {
+            return this.isMain
+                ? { pos: window.scrollX, total: document.documentElement.scrollWidth, client: window.innerWidth }
+                : { pos: this.target.scrollLeft, total: this.target.scrollWidth, client: this.target.clientWidth };
         }
-        return {
-            scrollTop:    this.target.scrollTop,
-            scrollHeight: this.target.scrollHeight,
-            clientHeight: this.target.clientHeight
-        };
     }
 
-    _update() {
-        const { scrollTop, scrollHeight, clientHeight } = this._scrollInfo();
-        const trackH = this.isMain ? window.innerHeight : this.target.getBoundingClientRect().height;
+    _trackSize() {
+        if (this.axis === 'y') return this.isMain ? window.innerHeight : this.target.getBoundingClientRect().height;
+        return this.isMain ? window.innerWidth : this.target.getBoundingClientRect().width;
+    }
 
-        if (scrollHeight <= clientHeight) {
-            this.track.style.display = 'none';
-            return;
-        }
+    // ── Update position ──
+    _update() {
+        const { pos, total, client } = this._info();
+        const trackSize = this._trackSize();
+
+        if (total <= client) { this.track.style.display = 'none'; return; }
         this.track.style.display = 'block';
 
-        const thumbH = Math.max(32, (clientHeight / scrollHeight) * trackH);
-        const maxTop = trackH - thumbH;
-        const thumbTop = (scrollTop / (scrollHeight - clientHeight)) * maxTop;
+        const thumbSize = Math.max(32, (client / total) * trackSize);
+        const maxOffset = trackSize - thumbSize;
+        const offset    = (pos / (total - client)) * maxOffset;
 
-        this.track.style.height = `${trackH}px`;
-        this.thumb.style.height = `${thumbH}px`;
-        this.thumb.style.top    = `${thumbTop}px`;
+        if (this.axis === 'y') {
+            this.track.style.height = `${trackSize}px`;
+            this.thumb.style.height = `${thumbSize}px`;
+            this.thumb.style.top    = `${offset}px`;
+        } else {
+            this.track.style.width = `${trackSize}px`;
+            this.thumb.style.width = `${thumbSize}px`;
+            this.thumb.style.left  = `${offset}px`;
+        }
     }
 
+    // ── Events ──
     _bindEvents() {
         this._onScroll = () => this._update();
         this._onResize = () => this._update();
@@ -212,31 +222,31 @@ class CustomScrollbar {
             this.target.addEventListener('scroll', this._onScroll, { passive: true });
         }
 
-        // ── Drag ────────────────────────
+        // Drag
         this.thumb.addEventListener('mousedown', (e) => {
             e.preventDefault();
             this.dragging = true;
-            this.dragStartY = e.clientY;
-            this.dragStartScroll = this._scrollInfo().scrollTop;
+            this.dragStart = this.axis === 'y' ? e.clientY : e.clientX;
+            this.dragStartScroll = this._info().pos;
             this.thumb.style.cursor = 'grabbing';
             this.thumb.style.filter = 'brightness(0.85)';
         });
 
-        this._onMouseMove = (e) => {
+        this._onMove = (e) => {
             if (!this.dragging) return;
-            const { scrollHeight, clientHeight } = this._scrollInfo();
-            const trackH = this.isMain ? window.innerHeight : this.target.getBoundingClientRect().height;
-            const thumbH = Math.max(32, (clientHeight / scrollHeight) * trackH);
-            const scrollable = trackH - thumbH;
-            const dy = e.clientY - this.dragStartY;
-            const ratio = dy / scrollable;
-            const newTop = this.dragStartScroll + ratio * (scrollHeight - clientHeight);
-
-            if (this.isMain) window.scrollTo(0, newTop);
-            else this.target.scrollTop = newTop;
+            const { total, client } = this._info();
+            const trackSize = this._trackSize();
+            const thumbSize = Math.max(32, (client / total) * trackSize);
+            const delta = (this.axis === 'y' ? e.clientY : e.clientX) - this.dragStart;
+            const newPos = this.dragStartScroll + (delta / (trackSize - thumbSize)) * (total - client);
+            if (this.isMain) {
+                this.axis === 'y' ? window.scrollTo(0, newPos) : window.scrollTo(newPos, 0);
+            } else {
+                this.axis === 'y' ? (this.target.scrollTop = newPos) : (this.target.scrollLeft = newPos);
+            }
         };
 
-        this._onMouseUp = () => {
+        this._onUp = () => {
             if (this.dragging) {
                 this.dragging = false;
                 this.thumb.style.cursor = 'grab';
@@ -244,22 +254,31 @@ class CustomScrollbar {
             }
         };
 
-        document.addEventListener('mousemove', this._onMouseMove);
-        document.addEventListener('mouseup',   this._onMouseUp);
+        document.addEventListener('mousemove', this._onMove);
+        document.addEventListener('mouseup',   this._onUp);
 
-        // ── Click track ─────────────────
+        // Click track
         this.track.addEventListener('click', (e) => {
             if (this.thumb.contains(e.target)) return;
             const rect = this.track.getBoundingClientRect();
-            const { scrollHeight, clientHeight } = this._scrollInfo();
-            const trackH = this.isMain ? window.innerHeight : this.target.getBoundingClientRect().height;
-            const ratio = (e.clientY - rect.top) / trackH;
-            const newTop = ratio * (scrollHeight - clientHeight);
-            if (this.isMain) window.scrollTo({ top: newTop, behavior: 'smooth' });
-            else this.target.scrollTo({ top: newTop, behavior: 'smooth' });
+            const { total, client } = this._info();
+            const trackSize = this._trackSize();
+            const ratio = this.axis === 'y'
+                ? (e.clientY - rect.top) / trackSize
+                : (e.clientX - rect.left) / trackSize;
+            const newPos = ratio * (total - client);
+            if (this.isMain) {
+                this.axis === 'y'
+                    ? window.scrollTo({ top: newPos, behavior: 'smooth' })
+                    : window.scrollTo({ left: newPos, behavior: 'smooth' });
+            } else {
+                this.axis === 'y'
+                    ? this.target.scrollTo({ top: newPos, behavior: 'smooth' })
+                    : this.target.scrollTo({ left: newPos, behavior: 'smooth' });
+            }
         });
 
-        // ── Hover ───────────────────────
+        // Hover
         this.thumb.addEventListener('mouseenter', () => {
             if (!this.dragging) this.thumb.style.filter = 'brightness(1.2)';
             this.label.style.color = 'white';
@@ -282,37 +301,26 @@ class CustomScrollbar {
             window.removeEventListener('scroll', this._onScroll);
             window.removeEventListener('resize', this._onResize);
         } else {
-            if (this.target) this.target.removeEventListener('scroll', this._onScroll);
+            this.target && this.target.removeEventListener('scroll', this._onScroll);
         }
-        document.removeEventListener('mousemove', this._onMouseMove);
-        document.removeEventListener('mouseup',   this._onMouseUp);
+        document.removeEventListener('mousemove', this._onMove);
+        document.removeEventListener('mouseup',   this._onUp);
     }
 }
 
-// ── Hide Native Scrollbars ───────────────────────────────────
-function injectGlobalStyle(settings) {
+// ── Inject / remove global CSS ───────────────────────────────
+function injectGlobalStyle() {
     let el = document.getElementById(STYLE_ID);
     if (!el) {
         el = document.createElement('style');
         el.id = STYLE_ID;
         (document.head || document.documentElement).appendChild(el);
     }
-
-    const mainW = settings.scrollbarSize || 14;
-    const intW  = settings.separateInternalSize
-        ? settings.internalScrollbarSize
-        : mainW;
-
     el.textContent = `
-        /* Hide native - main viewport */
         html { scrollbar-width: none !important; }
-        html::-webkit-scrollbar { display: none !important; width: 0 !important; }
-
-        /* Hide native - internal elements */
+        html::-webkit-scrollbar { display:none!important; width:0!important; height:0!important; }
         .sp-hide-scroll { scrollbar-width: none !important; }
-        .sp-hide-scroll::-webkit-scrollbar { display: none !important; width: 0 !important; }
-
-        /* Prevent overflow-x body shift when hiding viewport scrollbar */
+        .sp-hide-scroll::-webkit-scrollbar { display:none!important; width:0!important; height:0!important; }
         body { overflow-x: hidden; }
     `;
 }
@@ -322,44 +330,59 @@ function removeGlobalStyle() {
     if (el) el.remove();
 }
 
-// ── Detect scrollable internal elements ─────────────────────
-function isScrollable(el) {
-    if (el === document.documentElement || el === document.body) return false;
-    const style = getComputedStyle(el);
-    const overflowY = style.overflowY;
-    const canScroll = overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay';
-    if (!canScroll) return false;
-    return el.scrollHeight > el.clientHeight + 2;
+// ── Detect scrollable axes for an element ────────────────────
+function getScrollAxes(el) {
+    if (el === document.documentElement || el === document.body) return null;
+    if (el.classList && el.classList.contains(TRACK_CLASS)) return null;
+    if (el.classList && el.classList.contains(THUMB_CLASS)) return null;
+
+    const s = getComputedStyle(el);
+    const types = ['auto', 'scroll', 'overlay'];
+    const hasY = types.includes(s.overflowY) && el.scrollHeight > el.clientHeight + 2;
+    const hasX = types.includes(s.overflowX) && el.scrollWidth  > el.clientWidth  + 2;
+    return (hasY || hasX) ? { y: hasY, x: hasX } : null;
 }
 
+// ── Attach custom scrollbar(s) to an internal element ────────
 function attachInternal(el, settings) {
     if (internalScrollbars.has(el)) return;
+    const axes = getScrollAxes(el);
+    if (!axes) return;
+
     el.setAttribute(PROCESSED_ATTR, '1');
     el.classList.add('sp-hide-scroll');
-    const sb = new CustomScrollbar(el, settings, false);
-    internalScrollbars.set(el, sb);
+
+    const instances = [];
+    if (axes.y) instances.push(new CustomScrollbar(el, settings, false, 'y'));
+    if (axes.x) instances.push(new CustomScrollbar(el, settings, false, 'x'));
+
+    internalScrollbars.set(el, instances);
 }
 
 function scanInternals(settings) {
-    const all = document.querySelectorAll('*');
-    for (const el of all) {
-        if (!internalScrollbars.has(el) && isScrollable(el)) {
+    document.querySelectorAll('*').forEach(el => {
+        if (!internalScrollbars.has(el) && getScrollAxes(el)) {
             attachInternal(el, settings);
         }
-    }
+    });
 }
 
-// ── Main enable/disable ──────────────────────────────────────
+// ── Enable / Disable ─────────────────────────────────────────
 function enable(settings) {
-    injectGlobalStyle(settings);
+    injectGlobalStyle();
 
-    // Main window scrollbar
     if (!mainScrollbar) {
-        mainScrollbar = new CustomScrollbar(window, settings, true);
+        mainScrollbar = new CustomScrollbar(window, settings, true, 'y');
     } else {
         mainScrollbar.refresh(settings);
     }
 
+    // Refresh existing internals first
+    for (const [, instances] of internalScrollbars) {
+        for (const sb of instances) sb.refresh(settings);
+    }
+
+    // Then scan for new ones
     scanInternals(settings);
 }
 
@@ -368,36 +391,29 @@ function disable() {
 
     if (mainScrollbar) { mainScrollbar.destroy(); mainScrollbar = null; }
 
-    for (const [el, sb] of internalScrollbars) {
-        sb.destroy();
+    for (const [el, instances] of internalScrollbars) {
+        for (const sb of instances) sb.destroy();
         el.classList.remove('sp-hide-scroll');
         el.removeAttribute(PROCESSED_ATTR);
     }
     internalScrollbars.clear();
 }
 
-// ── MutationObserver: watch for new scrollable nodes ─────────
+// ── MutationObserver ─────────────────────────────────────────
 const observer = new MutationObserver(() => {
     if (currentSettings && currentSettings.extensionEnabled) {
         scanInternals(currentSettings);
     }
 });
-
 observer.observe(document.documentElement, { childList: true, subtree: true });
 
 // ── Apply settings ───────────────────────────────────────────
 function applySettings(settings) {
     currentSettings = settings;
-    if (!settings.extensionEnabled) {
-        disable();
-    } else {
-        enable(settings);
-        // Refresh all existing internals
-        for (const [, sb] of internalScrollbars) sb.refresh(settings);
-    }
+    settings.extensionEnabled ? enable(settings) : disable();
 }
 
-// ── Load from storage ────────────────────────────────────────
+// ── Build settings object ────────────────────────────────────
 function buildSettings(result) {
     return {
         extensionEnabled:            result.extensionEnabled !== false,
@@ -427,12 +443,12 @@ const STORAGE_KEYS = [
     'scrollbarSize','scrollbarRadius','separateInternalSize','internalScrollbarSize'
 ];
 
-// Init
+// ── Init ─────────────────────────────────────────────────────
 chrome.storage.local.get(STORAGE_KEYS, (result) => {
     applySettings(buildSettings(result));
 });
 
-// Live update
+// ── Live update ──────────────────────────────────────────────
 chrome.storage.onChanged.addListener((changes, ns) => {
     if (ns === 'local') {
         chrome.storage.local.get(STORAGE_KEYS, (result) => {
