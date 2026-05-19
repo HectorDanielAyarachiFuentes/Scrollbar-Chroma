@@ -33,7 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const scrollbarSizeInput = document.getElementById('scrollbar-size');
     const scrollbarRadiusInput = document.getElementById('scrollbar-radius');
+    const enableInternalScrollbars = document.getElementById('enable-internal-scrollbars');
     const separateInternalSize = document.getElementById('separate-internal-size');
+    const separateInternalSizeOption = document.getElementById('separate-internal-size-option');
     const internalScrollbarSizeInput = document.getElementById('internal-scrollbar-size');
     const internalSizeContainer = document.getElementById('internal-size-container');
     const sizeVal = document.getElementById('size-val');
@@ -68,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // Load saved settings
-    chrome.storage.local.get(['extensionEnabled', 'showText', 'showTextInternal', 'scrollbarText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius', 'separateInternalSize', 'internalScrollbarSize', 'thumbMinSize'], (result) => {
+    chrome.storage.local.get(['extensionEnabled', 'showText', 'showTextInternal', 'scrollbarText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius', 'separateInternalSize', 'internalScrollbarSize', 'thumbMinSize', 'enableInternalScrollbars'], (result) => {
         if (result.extensionEnabled !== undefined) {
             toggleExtension.checked = result.extensionEnabled;
             updateStatus(result.extensionEnabled);
@@ -115,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (result.separateInternalSize !== undefined) {
             separateInternalSize.checked = result.separateInternalSize;
-            internalSizeContainer.style.display = result.separateInternalSize ? 'flex' : 'none';
         }
         if (result.internalScrollbarSize !== undefined) {
             internalScrollbarSizeInput.value = result.internalScrollbarSize;
@@ -125,6 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
             thumbMinSizeInput.value = result.thumbMinSize;
             thumbMinVal.textContent = result.thumbMinSize + 'px';
         }
+
+        let enableInternals = true;
+        if (result.enableInternalScrollbars !== undefined) {
+            enableInternals = result.enableInternalScrollbars;
+        }
+        enableInternalScrollbars.checked = enableInternals;
+        updateInternalOptionsUI(enableInternals);
     });
 
     // Tab Switching
@@ -218,6 +226,22 @@ document.addEventListener('DOMContentLoaded', () => {
         sizeVal.textContent = e.target.value + 'px';
         chrome.storage.local.set({ scrollbarSize: parseInt(e.target.value) });
     });
+
+    enableInternalScrollbars.addEventListener('change', (e) => {
+        const isEnabled = e.target.checked;
+        chrome.storage.local.set({ enableInternalScrollbars: isEnabled });
+        updateInternalOptionsUI(isEnabled);
+    });
+
+    function updateInternalOptionsUI(enableInternals) {
+        if (enableInternals) {
+            separateInternalSizeOption.style.display = 'flex';
+            internalSizeContainer.style.display = separateInternalSize.checked ? 'flex' : 'none';
+        } else {
+            separateInternalSizeOption.style.display = 'none';
+            internalSizeContainer.style.display = 'none';
+        }
+    }
 
     separateInternalSize.addEventListener('change', (e) => {
         internalSizeContainer.style.display = e.target.checked ? 'flex' : 'none';

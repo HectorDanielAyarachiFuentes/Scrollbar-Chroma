@@ -420,13 +420,23 @@ function enable(settings) {
         mainScrollbar.refresh(settings);
     }
 
-    // Refresh existing internals first
-    for (const [, instances] of internalScrollbars) {
-        for (const sb of instances) sb.refresh(settings);
-    }
+    if (settings.enableInternalScrollbars) {
+        // Refresh existing internals first
+        for (const [, instances] of internalScrollbars) {
+            for (const sb of instances) sb.refresh(settings);
+        }
 
-    // Then scan for new ones
-    scanInternals(settings);
+        // Then scan for new ones
+        scanInternals(settings);
+    } else {
+        // Destroy all existing internal scrollbars if disabled
+        for (const [el, instances] of internalScrollbars) {
+            for (const sb of instances) sb.destroy();
+            el.classList.remove('sp-hide-scroll');
+            el.removeAttribute(PROCESSED_ATTR);
+        }
+        internalScrollbars.clear();
+    }
 }
 
 function disable() {
@@ -444,7 +454,7 @@ function disable() {
 
 // ── MutationObserver ─────────────────────────────────────────
 const observer = new MutationObserver(() => {
-    if (currentSettings && currentSettings.extensionEnabled) {
+    if (currentSettings && currentSettings.extensionEnabled && currentSettings.enableInternalScrollbars) {
         scanInternals(currentSettings);
     }
 });
@@ -477,7 +487,8 @@ function buildSettings(result) {
         scrollbarRadius:             result.scrollbarRadius || 10,
         separateInternalSize:        result.separateInternalSize || false,
         internalScrollbarSize:       result.internalScrollbarSize || 8,
-        thumbMinSize:                result.thumbMinSize || 40
+        thumbMinSize:                result.thumbMinSize || 40,
+        enableInternalScrollbars:    result.enableInternalScrollbars !== false
     };
 }
 
@@ -486,7 +497,7 @@ const STORAGE_KEYS = [
     'browserThemeColors','advancedColorsEnabled','trackColor','trackColor2',
     'thumbColor1','thumbColor2','advancedThumbGradientString','advancedTrackGradientString',
     'scrollbarSize','scrollbarRadius','separateInternalSize','internalScrollbarSize','thumbMinSize',
-    'showTextInternal'
+    'showTextInternal','enableInternalScrollbars'
 ];
 
 // ── Init ─────────────────────────────────────────────────────
