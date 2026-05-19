@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const sizeVal = document.getElementById('size-val');
     const internalSizeVal = document.getElementById('internal-size-val');
     const radiusVal = document.getElementById('radius-val');
+    const thumbMinSizeInput = document.getElementById('thumb-min-size');
+    const thumbMinVal = document.getElementById('thumb-min-val');
 
     let gradientsData = [];
 
@@ -114,6 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.internalScrollbarSize !== undefined) {
             internalScrollbarSizeInput.value = result.internalScrollbarSize;
             internalSizeVal.textContent = result.internalScrollbarSize + 'px';
+        }
+        if (result.thumbMinSize !== undefined) {
+            thumbMinSizeInput.value = result.thumbMinSize;
+            thumbMinVal.textContent = result.thumbMinSize + 'px';
         }
     });
 
@@ -222,6 +228,11 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollbarRadiusInput.addEventListener('input', (e) => {
         radiusVal.textContent = e.target.value + 'px';
         chrome.storage.local.set({ scrollbarRadius: parseInt(e.target.value) });
+    });
+
+    thumbMinSizeInput.addEventListener('input', (e) => {
+        thumbMinVal.textContent = e.target.value + 'px';
+        chrome.storage.local.set({ thumbMinSize: parseInt(e.target.value) });
     });
 
     // Toggle Extension

@@ -139,13 +139,24 @@ class CustomScrollbar {
                 background: thumbGrad, borderRadius: `${radius}px`,
                 width: '100%', position: 'absolute', left: '0',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'grab', userSelect: 'none', transition: 'filter 0.2s', overflow: 'hidden'
+                cursor: 'grab', userSelect: 'none', transition: 'filter 0.2s',
+                overflow: 'hidden'
             });
             Object.assign(this.label.style, {
-                color: 'rgba(255,255,255,0.75)', fontSize: '9px', fontWeight: 'bold',
-                fontFamily: 'sans-serif', transform: 'rotate(-90deg)',
-                whiteSpace: 'nowrap', userSelect: 'none', pointerEvents: 'none',
-                letterSpacing: '1px', display: text ? 'block' : 'none'
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: '10px',
+                fontWeight: 'bold',
+                fontFamily: 'sans-serif',
+                writingMode: 'vertical-rl',
+                textOrientation: 'mixed',
+                transform: 'rotate(180deg)',
+                userSelect: 'none',
+                pointerEvents: 'none',
+                letterSpacing: '2px',
+                overflow: 'hidden',
+                maxHeight: '90%',
+                flexShrink: '0',
+                display: text ? 'block' : 'none'
             });
         } else {
             // Horizontal
@@ -195,7 +206,8 @@ class CustomScrollbar {
         if (total <= client) { this.track.style.display = 'none'; return; }
         this.track.style.display = 'block';
 
-        const thumbSize = Math.max(32, (client / total) * trackSize);
+        const minThumb = this.settings.thumbMinSize || 40;
+        const thumbSize = Math.max(minThumb, (client / total) * trackSize);
         const maxOffset = trackSize - thumbSize;
         const offset    = (pos / (total - client)) * maxOffset;
 
@@ -203,10 +215,33 @@ class CustomScrollbar {
             this.track.style.height = `${trackSize}px`;
             this.thumb.style.height = `${thumbSize}px`;
             this.thumb.style.top    = `${offset}px`;
+
+            // Adjust font size based on thumb height so text always fits
+            const text = this.label.textContent;
+            if (text && this.label.style.display !== 'none') {
+                // Each char in vertical writing-mode takes ~fontSize * 1.2px in height
+                const maxFontSize = 12;
+                const minFontSize = 5;
+                const fittingSize = thumbSize / (text.length * 1.25);
+                const fontSize = Math.min(maxFontSize, Math.max(minFontSize, fittingSize));
+                this.label.style.fontSize = `${fontSize.toFixed(1)}px`;
+                this.label.style.visibility = (fittingSize < minFontSize) ? 'hidden' : 'visible';
+            }
         } else {
             this.track.style.width = `${trackSize}px`;
             this.thumb.style.width = `${thumbSize}px`;
             this.thumb.style.left  = `${offset}px`;
+
+            // Scale text to fit inside the thumb width
+            const text = this.label.textContent;
+            if (text && this.label.style.display !== 'none') {
+                const minFontSize = 6;
+                const maxFontSize = 11;
+                const fittingFontSize = thumbSize / (text.length * 0.65);
+                const fontSize = Math.min(maxFontSize, Math.max(minFontSize, fittingFontSize));
+                this.label.style.fontSize = `${fontSize.toFixed(1)}px`;
+                this.label.style.visibility = fittingFontSize < minFontSize ? 'hidden' : 'visible';
+            }
         }
     }
 
@@ -432,7 +467,8 @@ function buildSettings(result) {
         scrollbarSize:               result.scrollbarSize || 14,
         scrollbarRadius:             result.scrollbarRadius || 10,
         separateInternalSize:        result.separateInternalSize || false,
-        internalScrollbarSize:       result.internalScrollbarSize || 8
+        internalScrollbarSize:       result.internalScrollbarSize || 8,
+        thumbMinSize:                result.thumbMinSize || 40
     };
 }
 
@@ -440,7 +476,7 @@ const STORAGE_KEYS = [
     'extensionEnabled','showText','scrollbarText','theme','syncBrowserTheme',
     'browserThemeColors','advancedColorsEnabled','trackColor','trackColor2',
     'thumbColor1','thumbColor2','advancedThumbGradientString','advancedTrackGradientString',
-    'scrollbarSize','scrollbarRadius','separateInternalSize','internalScrollbarSize'
+    'scrollbarSize','scrollbarRadius','separateInternalSize','internalScrollbarSize','thumbMinSize'
 ];
 
 // ── Init ─────────────────────────────────────────────────────
