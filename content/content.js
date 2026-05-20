@@ -77,8 +77,9 @@ function getStyleValues(settings, isMain) {
         ? settings.showText !== false
         : settings.showTextInternal !== false && settings.showText !== false;
     const text = showText ? (settings.scrollbarText || '').toUpperCase() : '';
+    const textColor = settings.textColor || '#ffffff';
 
-    return { thumbGrad, trackBg, width, radius, text };
+    return { thumbGrad, trackBg, width, radius, text, textColor };
 }
 
 // ── CustomScrollbar class ────────────────────────────────────
@@ -137,7 +138,7 @@ class CustomScrollbar {
 
     // ── Styles ──
     _applyStyles() {
-        const { thumbGrad, trackBg, width, radius, text } = getStyleValues(this.settings, this.isMain);
+        const { thumbGrad, trackBg, width, radius, text, textColor } = getStyleValues(this.settings, this.isMain);
 
         // Helper to force-set a style with !important
         const forceStyle = (el, prop, val) => el.style.setProperty(prop, val, 'important');
@@ -161,7 +162,7 @@ class CustomScrollbar {
             forceStyle(this.thumb, 'border-radius', `${radius}px`);
 
             Object.assign(this.label.style, {
-                color: 'white',
+                color: textColor,
                 fontSize: '10px',
                 fontWeight: 'bold',
                 fontFamily: 'sans-serif',
@@ -196,7 +197,7 @@ class CustomScrollbar {
             forceStyle(this.thumb, 'border-radius', `${radius}px`);
 
             Object.assign(this.label.style, {
-                color: 'white',
+                color: textColor,
                 fontSize: '10px',
                 fontWeight: 'bold',
                 fontFamily: 'sans-serif',
@@ -513,6 +514,7 @@ function buildSettings(result) {
         showText:                    result.showText !== false,
         showTextInternal:            result.showTextInternal !== false,
         scrollbarText:               result.scrollbarText || '',
+        textColor:                   result.textColor || '#ffffff',
         theme:                       result.theme || 'purple',
         themeColors:                 result.themeColors || null,
         syncBrowserTheme:            result.syncBrowserTheme || false,
@@ -534,7 +536,7 @@ function buildSettings(result) {
 }
 
 const STORAGE_KEYS = [
-    'extensionEnabled','showText','showTextInternal','scrollbarText','theme','themeColors','syncBrowserTheme',
+    'extensionEnabled','showText','showTextInternal','scrollbarText','textColor','theme','themeColors','syncBrowserTheme',
     'browserThemeColors','advancedColorsEnabled','trackColor','trackColor2',
     'thumbColor1','thumbColor2','advancedThumbGradientString','advancedTrackGradientString',
     'scrollbarSize','scrollbarRadius','separateInternalSize','internalScrollbarSize','thumbMinSize',

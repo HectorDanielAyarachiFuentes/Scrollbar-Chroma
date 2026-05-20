@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleText = document.getElementById('toggle-text');
     const toggleTextInternal = document.getElementById('toggle-text-internal');
     const customTextInput = document.getElementById('custom-text-input');
+    const textColorInput = document.getElementById('text-color-input');
     const customTextContainer = document.getElementById('custom-text-container');
     const toggleSync = document.getElementById('toggle-sync');
     const statusMessage = document.getElementById('status-message');
@@ -168,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // Load saved settings
-    chrome.storage.local.get(['extensionEnabled', 'showText', 'showTextInternal', 'scrollbarText', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius', 'separateInternalSize', 'internalScrollbarSize', 'thumbMinSize', 'enableInternalScrollbars'], (result) => {
+    chrome.storage.local.get(['extensionEnabled', 'showText', 'showTextInternal', 'scrollbarText', 'textColor', 'theme', 'syncBrowserTheme', 'browserThemeColors', 'advancedColorsEnabled', 'trackColor', 'trackColor2', 'thumbColor1', 'thumbColor2', 'scrollbarSize', 'scrollbarRadius', 'separateInternalSize', 'internalScrollbarSize', 'thumbMinSize', 'enableInternalScrollbars'], (result) => {
         if (result.extensionEnabled !== undefined) {
             toggleExtension.checked = result.extensionEnabled;
             updateStatus(result.extensionEnabled);
@@ -184,6 +185,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (result.scrollbarText !== undefined) {
             customTextInput.value = result.scrollbarText;
+        }
+
+        if (result.textColor !== undefined) {
+            textColorInput.value = result.textColor;
         }
 
         if (result.syncBrowserTheme !== undefined) {
@@ -382,6 +387,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     customTextInput.addEventListener('input', (e) => {
         chrome.storage.local.set({ scrollbarText: e.target.value });
+    });
+
+    textColorInput.addEventListener('input', (e) => {
+        chrome.storage.local.set({ textColor: e.target.value });
     });
 
     // Toggle Sync

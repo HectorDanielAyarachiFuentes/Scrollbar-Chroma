@@ -75,9 +75,12 @@
                                 <span class="slider round"></span>
                             </label>
                         </div>
-                        <div id="custom-text-container" style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-top: 4px;">
+                        <div id="custom-text-container" style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-top: 4px; gap: 8px;">
                             <span style="font-size: 11px; color: var(--text-secondary);">Texto personalizado</span>
-                            <input type="text" id="custom-text-input" value="NAV" placeholder="NAV" maxlength="8" style="background: var(--bg-hover); color: white; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; width: 80px; text-align: center; font-size: 11px; font-family: inherit;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <input type="color" id="text-color-input" value="#ffffff" title="Color del texto" style="width: 24px; height: 24px; border-radius: 4px;">
+                                <input type="text" id="custom-text-input" value="NAV" placeholder="NAV" maxlength="8" style="background: var(--bg-hover); color: white; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; width: 80px; text-align: center; font-size: 11px; font-family: inherit;">
+                            </div>
                         </div>
                     </div>
 
