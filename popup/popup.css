@@ -61,25 +61,20 @@ header {
     gap: 11px;
 }
 
-.logo-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-    position: relative;
-    box-shadow: 0 0 18px var(--accent-glow), 0 4px 10px rgba(0,0,0,0.4);
+.logo-svg {
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2px;
+    box-shadow: 0 0 15px var(--accent-glow), 0 4px 10px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.logo-icon::after {
-    content: '';
-    position: absolute;
-    top: 5px;
-    left: 13px;
-    width: 4px;
-    height: 24px;
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: 2px;
+.logo-svg:hover {
+    transform: scale(1.05) rotate(2deg);
+    box-shadow: 0 0 20px var(--accent-glow), 0 6px 12px rgba(0,0,0,0.5);
 }
 
 h1 {
