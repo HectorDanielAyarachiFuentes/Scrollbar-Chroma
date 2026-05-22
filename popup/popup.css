@@ -62,19 +62,16 @@ header {
 }
 
 .logo-svg {
-    width: 44px;
-    height: 44px;
+    width: 46px;
+    height: 46px;
     flex-shrink: 0;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 2px;
-    box-shadow: 0 0 15px var(--accent-glow), 0 4px 10px rgba(0,0,0,0.4);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+    transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 .logo-svg:hover {
     transform: scale(1.05) rotate(2deg);
-    box-shadow: 0 0 20px var(--accent-glow), 0 6px 12px rgba(0,0,0,0.5);
+    filter: drop-shadow(0 0 14px var(--accent-1));
 }
 
 h1 {
