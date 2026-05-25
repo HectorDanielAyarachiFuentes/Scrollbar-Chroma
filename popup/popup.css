@@ -92,6 +92,46 @@ h1 span {
     margin-top: 1px;
 }
 
+/* ── Header Actions ──────────────────────── */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.icon-btn svg {
+    transition: transform 0.2s ease;
+}
+
+.icon-btn:hover svg {
+    transform: scale(1.1);
+}
+
+.header-divider {
+    width: 1px;
+    height: 18px;
+    background: var(--border-color);
+    margin: 0 4px;
+}
+
 /* ── Tabs ─────────────────────────────────── */
 .tabs {
     display: flex;
